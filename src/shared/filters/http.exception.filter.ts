@@ -15,14 +15,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     const message = exception.message;
 
-    console.error(
-      `[EXCEPTION] - ${new Date().toISOString()} - ${exception.stack}`,
-    );
+    const now = new Date().toISOString();
+
+    console.error(`[EXCEPTION] - ${now} - ${exception.stack}`);
 
     response.status(status).json({
       statusCode: status,
       message: message,
-      timestamp: new Date().toISOString(),
+      timestamp: now,
       path: request.url,
     });
   }

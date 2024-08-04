@@ -1,7 +1,6 @@
-import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { LoggerMiddleware } from './shared/middlewares/logger.middleware';
-import { AllExceptionsFilter } from './shared/filters/all.exceptions.filter';
 import { HttpExceptionFilter } from './shared/filters/http.exception.filter';
 
 async function bootstrap() {

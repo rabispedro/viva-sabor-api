@@ -12,7 +12,7 @@ export class UsersRepository {
     return user.id;
   }
 
-  findAll(): User[] {
+  findAll(activeOnly?: boolean, quantity?: number, page?: number): User[] {
     return this.users;
   }
 

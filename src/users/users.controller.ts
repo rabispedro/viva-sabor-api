@@ -7,29 +7,39 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
-  UsePipes,
+  Query,
+  DefaultValuePipe,
+  ParseBoolPipe,
+  ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UUID } from 'crypto';
-import { ZodValidationPipe } from 'src/shared/pipes/zod.validation.pipe';
-import { CreateUserSchema } from './schemas/create-user.schema';
-import { UpdateUserSchema } from './schemas/update-user.schema';
+import { ValidationPipe } from 'src/shared/pipes/validation.pipe';
+import { RolesGuard } from 'src/shared/guards/roles.guard';
+import { Roles } from 'src/shared/decorators/roles.decorator';
 
 @Controller('users')
+@UseGuards(RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @UsePipes(new ZodValidationPipe(CreateUserSchema))
-  create(@Body() createUserDto: CreateUserDto) {
+  @Roles(['admin', 'manager'])
+  create(@Body(new ValidationPipe()) createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  findAll(
+    @Query('activeOnly', new DefaultValuePipe(false), ParseBoolPipe)
+    activeOnly: boolean,
+    @Query('quantity', new DefaultValuePipe(10), ParseIntPipe) quantity: number,
+    @Query('page', new DefaultValuePipe(0), ParseIntPipe) page: number,
+  ) {
+    return this.usersService.findAll(activeOnly, quantity, page);
   }
 
   @Get(':id')
@@ -38,15 +48,16 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @UsePipes(new ZodValidationPipe(UpdateUserSchema))
+  @Roles(['admin', 'manager'])
   update(
     @Param('id', ParseUUIDPipe) id: UUID,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
   ) {
     return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
+  @Roles(['admin', 'manager'])
   remove(@Param('id', ParseUUIDPipe) id: UUID) {
     return this.usersService.remove(id);
   }
