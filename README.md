@@ -29,6 +29,12 @@
 
 API monolítica Viva Sabor para a plataforma de gastronomia do desafio Grão Direto.
 
+## Requisitos
+
+- Autenticação por email e senha
+- API REST
+- Repositório de dados com `usuários`, `restaurantes` e `itens do cardápio`
+
 ## Installation
 
 ```bash
@@ -60,17 +66,3 @@ $ yarn run test:e2e
 # test coverage
 $ yarn run test:cov
 ```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
