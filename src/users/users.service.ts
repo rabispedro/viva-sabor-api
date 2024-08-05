@@ -1,54 +1,67 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UsersRepository } from './users.repository';
 import { UUID } from 'crypto';
 import { User } from './entities/user.entity';
 import { UserResponseDto } from './dto/user-response.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) {}
 
-  create(createUserDto: CreateUserDto): UUID {
-    console.log('Teste: ', createUserDto);
-
-    const user: UserResponseDto = {
-      ...createUserDto,
-      id: crypto.randomUUID(),
-      isActive: true,
-    };
-
-    return this.usersRepository.create(user);
+  async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
+    const result = this.usersRepository.create(createUserDto);
+    await this.usersRepository.save(result);
+    return { ...result };
   }
 
-  findAll(
-    activeOnly?: boolean,
-    quantity?: number,
-    page?: number,
-  ): UserResponseDto[] {
-    const users = this.usersRepository.findAll(activeOnly, quantity, page);
+  async findAll(): Promise<UserResponseDto[]> {
+    const users = await this.usersRepository.find();
 
     if (!users || users.length === 0)
       throw new NotFoundException('Users cannot be found');
 
-    return users;
+    return { ...users };
   }
 
-  findOne(id: UUID): UserResponseDto | undefined {
-    return this.usersRepository.findOne(id);
+  async findById(id: UUID): Promise<UserResponseDto> {
+    const user = await this.usersRepository.findOneBy({ id });
+
+    if (!user) throw new NotFoundException('User with this id not found');
+
+    return user;
   }
 
-  update(id: UUID, updateUserDto: UpdateUserDto): boolean {
-    const user: User = {
-      ...updateUserDto,
-      id: crypto.randomUUID(),
-    };
+  async findByEmail(email: string): Promise<UserResponseDto> {
+    const user = await this.usersRepository.findOneBy({ email });
 
-    return this.usersRepository.update(id, user);
+    if (!user) throw new NotFoundException('User with this email not found');
+
+    return user;
   }
 
-  remove(id: UUID): boolean {
-    return this.usersRepository.remove(id);
+  async update(id: UUID, updateUserDto: UpdateUserDto): Promise<UUID> {
+    const user = await this.usersRepository.save(updateUserDto);
+
+    if (!user) throw new BadRequestException('User could not be updated');
+
+    return id;
+  }
+
+  async remove(id: UUID): Promise<UUID> {
+    const result = (await this.usersRepository.delete(id)).affected;
+
+    if (!result || result === 0) throw new NotFoundException('User not found');
+
+    return id;
   }
 }

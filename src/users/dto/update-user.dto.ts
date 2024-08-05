@@ -10,30 +10,39 @@ import {
   IsString,
   IsUrl,
 } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
+  @ApiProperty()
   @IsString()
   firstName: string;
 
+  @ApiProperty()
   @IsString()
   lastName: string;
 
+  @ApiProperty()
   @IsArray()
   roles: string[];
 
+  @ApiProperty()
   @IsDate()
   birthDate: Date;
 
+  @ApiProperty()
   @IsEmail()
   email: string;
 
+  @ApiProperty()
   @IsPhoneNumber()
-  phone: string;
+  phoneNumber: string;
 
+  @ApiProperty()
   @IsOptional()
   @IsUrl()
   image_url?: string;
 
+  @ApiProperty()
   @IsBoolean()
   isActive: boolean;
 }

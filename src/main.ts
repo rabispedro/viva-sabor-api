@@ -4,6 +4,8 @@ import { LoggerMiddleware } from './shared/middlewares/logger.middleware';
 import { HttpExceptionFilter } from './shared/filters/http.exception.filter';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { abortOnError: false });
@@ -19,11 +21,14 @@ async function bootstrap() {
     )
     .setVersion('1.0.0')
     .addTag('users')
-    .addTag('credentials')
+    .addTag('auth')
     .addBearerAuth()
     .build();
 
-  const document = SwaggerModule.createDocument(app, documentConfig);
+  const document = SwaggerModule.createDocument(app, documentConfig, {
+    include: [AuthModule, UsersModule],
+    deepScanRoutes: true,
+  });
   SwaggerModule.setup('swagger', app, document);
 
   //  Global Middlewares
