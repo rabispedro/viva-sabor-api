@@ -14,6 +14,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = context.getRequest<Request>();
     const status = exception.getStatus();
     const message = exception.message;
+    const cause = exception.cause;
 
     const now = new Date().toISOString();
 
@@ -23,6 +24,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       statusCode: status,
       message: message,
       timestamp: now,
+      cause: cause,
       path: request.url,
     });
   }

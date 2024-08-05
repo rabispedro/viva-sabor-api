@@ -1,9 +1,11 @@
 import {
   IsArray,
-  IsDate,
+  IsDateString,
   IsEmail,
+  IsOptional,
   IsPhoneNumber,
   IsString,
+  IsUrl,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -16,7 +18,7 @@ export class CreateUserDto {
   @IsArray()
   roles: string[];
 
-  @IsDate()
+  @IsDateString()
   birthDate: Date;
 
   @IsEmail()
@@ -24,4 +26,8 @@ export class CreateUserDto {
 
   @IsPhoneNumber()
   phone: string;
+
+  @IsOptional()
+  @IsUrl()
+  image_url?: string;
 }

@@ -1,0 +1,62 @@
+services:
+  cache:
+    image: redis:7.2.5-alpine
+    container_name: cache-redis-db
+    restart: always
+    ports:
+      - 6379:6379
+    mem_limit: 512mb
+    volumes:
+      - ./compose/data/cache:/data
+    networks:
+      - localnet
+
+  # bucket:
+    # image: 
+    # container_name: nosql-supabase-db
+    # restart: always
+    # ports:
+    #   - 
+    # mem_limit: 512mb
+    # cpu_percent: 5
+    # volumes:
+    #   - compose/data/nosql:/var/lib/postgres/data
+    # environment:
+      # - 
+    # networks:
+    #   - localnet
+
+  # nosql:
+    # image: 
+    # container_name: nosql-mongo-db
+    # restart: always
+    # ports:
+    #   - 
+    # mem_limit: 512mb
+    # cpu_percent: 5
+    # volumes:
+    #   - compose/data/nosql:/var/lib/postgres/data
+    # environment:
+      # - 
+    # networks:
+    #   - localnet
+
+  sql:
+    image: postgres:15.2-alpine3.17
+    container_name: sql-postgre-db
+    restart: always
+    ports:
+      - 5432:5432
+    mem_limit: 512mb
+    volumes:
+      - ./compose/data/sql:/var/lib/postgres/data
+    environment:
+      - POSTGRES_DB=vivasabor
+      - POSTGRES_USER=viva-sabor
+      - POSTGRES_PASSWORD=Viva_Sabor@123
+    networks:
+      - localnet
+
+networks:
+  localnet:
+    driver: bridge

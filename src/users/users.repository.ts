@@ -6,14 +6,26 @@ import { UUID } from 'crypto';
 export class UsersRepository {
   private users: User[];
 
+  constructor() {
+    this.users = [];
+  }
+
   create(user: User): UUID {
     user.id = crypto.randomUUID();
     this.users.push(user);
     return user.id;
   }
 
-  findAll(activeOnly?: boolean, quantity?: number, page?: number): User[] {
-    return this.users;
+  findAll(
+    activeOnly: boolean = false,
+    quantity: number = 10,
+    page: number = 0,
+  ): User[] {
+    return this.users
+      .filter((user: User) => {
+        if (activeOnly) return user.isActive === true;
+      })
+      .slice(page * quantity, page * quantity + quantity);
   }
 
   findOne(id: UUID): User | undefined {

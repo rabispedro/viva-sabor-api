@@ -9,8 +9,6 @@ import {
   ParseUUIDPipe,
   Query,
   DefaultValuePipe,
-  ParseBoolPipe,
-  ParseIntPipe,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -34,10 +32,11 @@ export class UsersController {
 
   @Get()
   findAll(
-    @Query('activeOnly', new DefaultValuePipe(false), ParseBoolPipe)
-    activeOnly: boolean,
-    @Query('quantity', new DefaultValuePipe(10), ParseIntPipe) quantity: number,
-    @Query('page', new DefaultValuePipe(0), ParseIntPipe) page: number,
+    @Query('activeOnly', new DefaultValuePipe(false))
+    activeOnly?: boolean,
+    @Query('quantity', new DefaultValuePipe(10))
+    quantity?: number,
+    @Query('page', new DefaultValuePipe(0)) page?: number,
   ) {
     return this.usersService.findAll(activeOnly, quantity, page);
   }

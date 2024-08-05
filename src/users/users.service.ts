@@ -11,9 +11,12 @@ export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
   create(createUserDto: CreateUserDto): UUID {
+    console.log('Teste: ', createUserDto);
+
     const user: UserResponseDto = {
       ...createUserDto,
       id: crypto.randomUUID(),
+      isActive: true,
     };
 
     return this.usersRepository.create(user);
@@ -26,7 +29,8 @@ export class UsersService {
   ): UserResponseDto[] {
     const users = this.usersRepository.findAll(activeOnly, quantity, page);
 
-    if (!users || users.length === 0) throw new NotFoundException();
+    if (!users || users.length === 0)
+      throw new NotFoundException('Users cannot be found');
 
     return users;
   }
@@ -44,7 +48,7 @@ export class UsersService {
     return this.usersRepository.update(id, user);
   }
 
-  remove(_id: UUID): boolean {
-    return false;
+  remove(id: UUID): boolean {
+    return this.usersRepository.remove(id);
   }
 }
