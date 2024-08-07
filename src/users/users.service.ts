@@ -10,6 +10,7 @@ import { User } from './entities/user.entity';
 import { UserResponseDto } from './dto/user-response.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { hashSync } from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -19,34 +20,52 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
+    createUserDto.password = hashSync(
+      createUserDto.password,
+      process.env.ENCRYPT_SALT!,
+    );
     const result = this.usersRepository.create(createUserDto);
     await this.usersRepository.save(result);
-    return { ...result };
+    return { ...result, password: '', roles: [] };
   }
 
-  async findAll(): Promise<UserResponseDto[]> {
+  async findAll(ommitPassword?: boolean): Promise<UserResponseDto[]> {
     const users = await this.usersRepository.find();
 
     if (!users || users.length === 0)
       throw new NotFoundException('Users cannot be found');
 
-    return { ...users };
+    if (ommitPassword === true)
+      users.forEach((user: User) => (user.password = ''));
+
+    console.log('Users: ', users);
+
+    return [];
   }
 
-  async findById(id: UUID): Promise<UserResponseDto> {
-    const user = await this.usersRepository.findOneBy({ id });
+  async findById(id: UUID, ommitPassword?: boolean): Promise<UserResponseDto> {
+    const user: User | null = await this.usersRepository.findOneBy({ id: id });
 
     if (!user) throw new NotFoundException('User with this id not found');
 
-    return user;
+    if (ommitPassword === true) user.password = '';
+
+    return { ...user, roles: [] };
   }
 
-  async findByEmail(email: string): Promise<UserResponseDto> {
-    const user = await this.usersRepository.findOneBy({ email });
+  async findByEmail(
+    email: string,
+    ommitPassword?: boolean,
+  ): Promise<UserResponseDto> {
+    const user: User | null = await this.usersRepository.findOneBy({
+      email: email,
+    });
 
     if (!user) throw new NotFoundException('User with this email not found');
 
-    return user;
+    if (ommitPassword === true) user.password = '';
+
+    return { ...user, roles: [] };
   }
 
   async update(id: UUID, updateUserDto: UpdateUserDto): Promise<UUID> {

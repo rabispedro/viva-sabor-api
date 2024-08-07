@@ -11,6 +11,7 @@ import {
   IsUrl,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Role } from '../entities/roles.entity';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
   @ApiProperty()
@@ -23,7 +24,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 
   @ApiProperty()
   @IsArray()
-  roles: string[];
+  roles: Role[];
 
   @ApiProperty()
   @IsDate()

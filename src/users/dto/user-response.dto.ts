@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UUID } from 'crypto';
+import { Role } from '../entities/roles.entity';
 
 export class UserResponseDto {
   @ApiProperty()
@@ -15,7 +16,7 @@ export class UserResponseDto {
   password: string;
 
   @ApiProperty()
-  roles: string[];
+  roles: Role[];
 
   @ApiProperty()
   birthDate: Date;

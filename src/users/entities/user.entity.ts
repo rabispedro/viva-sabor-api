@@ -3,45 +3,53 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
+  // JoinTable,
+  // ManyToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Role } from './roles.entity';
+// import { Role } from './roles.entity';
 
 @Entity('tbl_user')
 export class User {
-  @PrimaryColumn({ name: 'id', type: 'uuid' })
+  @PrimaryColumn('uuid')
   id: UUID;
 
-  @Column({ name: 'first_name', type: 'varchar' })
+  @Column()
   firstName: string;
 
-  @Column({ name: 'last_name', type: 'varchar' })
+  @Column()
   lastName: string;
 
-  @Column({ name: 'password', type: 'varchar' })
+  @Column()
   password: string;
 
-  roles: string[];
+  @ManyToMany(() => Role)
+  @JoinTable()
+  roles: Role[];
 
-  @Column({ name: 'birth_date', type: 'timestamptz' })
+  @Column()
   birthDate: Date;
 
-  @Column({ name: 'email', type: 'varchar', unique: true })
+  @Column()
   email: string;
 
-  @Column({ name: 'phone_number', type: 'varchar' })
+  @Column()
   phoneNumber: string;
 
-  @Column({ name: 'image_url', type: 'varchar', nullable: true })
+  @Column()
   image_url?: string;
 
-  @Column({ name: 'is_active', default: true, type: 'boolean' })
+  @Column()
   isActive: boolean;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
+  @UpdateDateColumn()
   updatedAt: Date;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  @CreateDateColumn()
   createdAt: Date;
 
   constructor() {

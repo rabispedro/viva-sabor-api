@@ -13,6 +13,11 @@ async function bootstrap() {
   const configService: ConfigService = app.get(ConfigService);
   const port: number = configService.get('API_PORT') ?? 3000;
 
+  //  Api Versioning Config
+  // app.enableVersioning({
+  //   type: VersioningType.URI,
+  // });
+
   //  Swagger Documentation
   const documentConfig = new DocumentBuilder()
     .setTitle('Viva Sabor API')

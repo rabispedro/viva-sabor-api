@@ -8,6 +8,7 @@ import {
   IsString,
   IsUrl,
 } from 'class-validator';
+import { Role } from '../entities/roles.entity';
 
 export class CreateUserDto {
   @ApiProperty()
@@ -24,7 +25,7 @@ export class CreateUserDto {
 
   @ApiProperty()
   @IsArray()
-  roles: string[];
+  roles: Role[];
 
   @ApiProperty()
   @IsDateString()
