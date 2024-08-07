@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './shared/guards/auth.guard';
+import { RestaurantsModule } from './restaurants/restaurants.module';
 
 @Module({
   imports: [
@@ -45,6 +46,8 @@ import { AuthGuard } from './shared/guards/auth.guard';
       password: process.env.SQL_PASSWORD,
       database: process.env.SQL_DB,
       autoLoadEntities: true,
+      //  Apenas para evitar migrations, no momento
+      synchronize: true,
     }),
     CacheModule.register({
       max: 64,
@@ -71,6 +74,7 @@ import { AuthGuard } from './shared/guards/auth.guard';
     }),
     UsersModule,
     AuthModule,
+    RestaurantsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -9,6 +9,8 @@ import {
   ParseUUIDPipe,
   UseGuards,
   UseInterceptors,
+  Put,
+  ParseBoolPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -16,14 +18,14 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ValidationPipe } from 'src/shared/pipes/validation.pipe';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
 // import { Roles } from 'src/shared/decorators/roles.decorator';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+// import { CacheInterceptor } from '@nestjs/cache-manager';
 import { UserResponseDto } from './dto/user-response.dto';
 import { ApiBearerAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UUID } from 'crypto';
 import { PublicRoute } from 'src/shared/decorators/public-route.decorator';
 
 @Controller('users')
-@UseInterceptors(CacheInterceptor)
+// @UseInterceptors(CacheInterceptor)
 @UseGuards(RolesGuard)
 @ApiTags('users')
 @ApiBearerAuth()
@@ -35,13 +37,12 @@ export class UsersController {
   @PublicRoute()
   @ApiResponse({ type: UserResponseDto })
   async create(
-    @Body(new ValidationPipe()) createUserDto: CreateUserDto,
+    @Body(ValidationPipe) createUserDto: CreateUserDto,
   ): Promise<UserResponseDto> {
     return await this.usersService.create(createUserDto);
   }
 
   @Get()
-  // @ApiResponse({ type: Array<UserResponseDto> })
   @ApiResponse({ type: UserResponseDto })
   async findAll(): Promise<UserResponseDto[]> {
     return await this.usersService.findAll(true);
@@ -50,24 +51,37 @@ export class UsersController {
   @Get(':id')
   @ApiParam({ name: 'id' })
   @ApiResponse({ type: UserResponseDto })
-  async findOne(
+  async findById(
     @Param('id', ParseUUIDPipe) id: UUID,
   ): Promise<UserResponseDto> {
     return await this.usersService.findById(id, true);
   }
 
-  @Patch(':id')
+  @Put(':id')
   // @Roles(['admin', 'manager'])
+  @ApiParam({ name: 'id' })
   // @ApiResponse({ type: typeof string })
   async update(
     @Param('id', ParseUUIDPipe) id: UUID,
-    @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
+    @Body(ValidationPipe) updateUserDto: UpdateUserDto,
   ): Promise<UUID> {
     return await this.usersService.update(id, updateUserDto);
   }
 
+  // @Patch(':id/active/:flag')
+  // @ApiParam({ name: 'id' })
+  // @ApiParam({ name: 'flag' })
+  // @ApiResponse({ type: UserResponseDto })
+  // async changeActive(
+  //   @Param('id', ParseUUIDPipe) id: UUID,
+  //   @Param('flag', ParseBoolPipe) flag: boolean,
+  // ): Promise<UserResponseDto> {
+  //   return await this.usersService.changeActive(id, flag);
+  // }
+
   @Delete(':id')
   // @Roles(['admin', 'manager'])
+  @ApiParam({ name: 'id' })
   // @ApiResponse({ type: typeof string })
   async remove(@Param('id', ParseUUIDPipe) id: UUID): Promise<UUID> {
     return await this.usersService.remove(id);

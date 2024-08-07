@@ -27,6 +27,9 @@ async function bootstrap() {
     .setVersion('1.0.0')
     .addTag('users')
     .addTag('auth')
+    .addTag('restaurants')
+    .addTag('items')
+    .addTag('ingredients')
     .addBearerAuth()
     .build();
 

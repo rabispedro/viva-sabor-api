@@ -1,7 +1,7 @@
 import { UUID } from 'crypto';
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
-@Entity('tbl_role')
+@Entity('Role')
 export class Role {
   @PrimaryColumn('uuid')
   id: UUID;

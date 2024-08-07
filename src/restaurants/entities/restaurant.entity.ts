@@ -1,44 +1,52 @@
 import { UUID } from 'crypto';
+import { User } from 'src/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
+  JoinColumn,
   ManyToMany,
+  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Role } from './roles.entity';
+import { Item } from './item.entity';
 
-@Entity('User')
-export class User {
+@Entity('Restaurant')
+export class Restaurant {
   @PrimaryColumn('uuid')
   id: UUID;
 
-  @Column()
-  firstName: string;
+  // @Column()
+  // razaoSocial: string;
 
   @Column()
-  lastName: string;
+  nomeFantasia: string;
 
   @Column()
-  password: string;
-
-  @ManyToMany(() => Role)
-  @JoinTable()
-  roles: Role[];
+  cnpj: string;
 
   @Column()
-  birthDate: Date;
+  imageUrl?: string;
+
+  @Column()
+  bannerImageUrl?: string;
+
+  @ManyToMany(() => User)
+  @JoinColumn()
+  managers: User[];
+
+  @OneToMany(() => Item, (item) => item.restaurant)
+  items: Item[];
+
+  @Column()
+  minimumFee: number;
 
   @Column()
   email: string;
 
   @Column()
   phoneNumber: string;
-
-  @Column()
-  imageUrl?: string;
 
   @Column()
   isActive: boolean;
