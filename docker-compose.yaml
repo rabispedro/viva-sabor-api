@@ -26,20 +26,21 @@ services:
     # networks:
     #   - localnet
 
-  # nosql:
-    # image: 
-    # container_name: nosql-mongo-db
-    # restart: always
-    # ports:
-    #   - 
-    # mem_limit: 512mb
-    # cpu_percent: 5
-    # volumes:
-    #   - compose/data/nosql:/var/lib/postgres/data
-    # environment:
-      # - 
-    # networks:
-    #   - localnet
+  nosql:
+    image: mongo:7.0.13-rc0-jammy
+    container_name: nosql-mongo-db
+    restart: always
+    ports:
+      - 27017:27017
+    mem_limit: 512mb
+    cpu_percent: 5
+    volumes:
+      - ./compose/data/document:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME:viva-sabor
+      - MONGO_INITDB_ROOT_PASSWORD:Viva_Sabor_123
+    networks:
+      - localnet
 
   sql:
     image: postgres:15.2-alpine3.17

@@ -23,6 +23,7 @@ import { UserResponseDto } from './dto/user-response.dto';
 import { ApiBearerAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UUID } from 'crypto';
 import { PublicRoute } from 'src/shared/decorators/public-route.decorator';
+import { Roles } from 'src/shared/decorators/roles.decorator';
 
 @Controller('users')
 // @UseInterceptors(CacheInterceptor)
@@ -33,7 +34,6 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  // @Roles(['admin', 'manager'])
   @PublicRoute()
   @ApiResponse({ type: UserResponseDto })
   async create(
@@ -43,6 +43,7 @@ export class UsersController {
   }
 
   @Get()
+  @Roles(['admin', 'manager', ''])
   @ApiResponse({ type: UserResponseDto })
   async findAll(): Promise<UserResponseDto[]> {
     return await this.usersService.findAll(true);
@@ -60,7 +61,7 @@ export class UsersController {
   @Put(':id')
   // @Roles(['admin', 'manager'])
   @ApiParam({ name: 'id' })
-  // @ApiResponse({ type: typeof string })
+  @ApiResponse({ type: String })
   async update(
     @Param('id', ParseUUIDPipe) id: UUID,
     @Body(ValidationPipe) updateUserDto: UpdateUserDto,
@@ -68,21 +69,21 @@ export class UsersController {
     return await this.usersService.update(id, updateUserDto);
   }
 
-  // @Patch(':id/active/:flag')
-  // @ApiParam({ name: 'id' })
-  // @ApiParam({ name: 'flag' })
-  // @ApiResponse({ type: UserResponseDto })
-  // async changeActive(
-  //   @Param('id', ParseUUIDPipe) id: UUID,
-  //   @Param('flag', ParseBoolPipe) flag: boolean,
-  // ): Promise<UserResponseDto> {
-  //   return await this.usersService.changeActive(id, flag);
-  // }
+  @Patch(':id/active/:flag')
+  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'flag' })
+  @ApiResponse({ type: UserResponseDto })
+  async changeActive(
+    @Param('id', ParseUUIDPipe) id: UUID,
+    @Param('flag', ParseBoolPipe) flag: boolean,
+  ): Promise<UserResponseDto> {
+    return await this.usersService.changeActive(id, flag);
+  }
 
   @Delete(':id')
   // @Roles(['admin', 'manager'])
   @ApiParam({ name: 'id' })
-  // @ApiResponse({ type: typeof string })
+  @ApiResponse({ type: String })
   async remove(@Param('id', ParseUUIDPipe) id: UUID): Promise<UUID> {
     return await this.usersService.remove(id);
   }

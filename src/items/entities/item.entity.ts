@@ -1,15 +1,13 @@
 import { UUID } from 'crypto';
+import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
   ManyToOne,
-  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Restaurant } from './restaurant.entity';
-import { Ingredient } from './ingredient.entity';
 
 @Entity('Item')
 export class Item {
@@ -24,9 +22,6 @@ export class Item {
 
   @ManyToOne(() => Restaurant, (restaurant) => restaurant.items)
   restaurant: Restaurant;
-
-  @OneToMany(() => Ingredient, (ingredient) => ingredient.item)
-  ingredients: Ingredient[];
 
   @Column()
   price: number;
@@ -48,5 +43,9 @@ export class Item {
 
   constructor() {
     if (!this.id) this.id = crypto.randomUUID();
+  }
+
+  getTotalPrice(): number {
+    return this.price - (this.discount ?? 0);
   }
 }

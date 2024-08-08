@@ -12,6 +12,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './shared/guards/auth.guard';
 import { RestaurantsModule } from './restaurants/restaurants.module';
+import { IngredientsModule } from './ingredients/ingredients.module';
+import { ItemsModule } from './items/items.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -20,16 +23,32 @@ import { RestaurantsModule } from './restaurants/restaurants.module';
       isGlobal: true,
       cache: true,
       validationSchema: Joi.object({
+        // App Config
         ENV: Joi.string().valid('dev', 'stg', 'prd').default('dev').required(),
         API_PORT: Joi.number().port().default(3000).required(),
+
+        // SQL Database Config
         SQL_DB: Joi.string().default('postgre').required(),
         SQL_USER: Joi.string().required(),
         SQL_PASSWORD: Joi.string().required(),
         SQL_HOST: Joi.string().default('localhost').required(),
         SQL_PORT: Joi.number().port().default(5432).required(),
+
+        // NO-SQL Database Config
+        NOSQL_DB: Joi.string().default('mongodb').required(),
+        NOSQL_USER: Joi.string().required(),
+        NOSQL_PASSWORD: Joi.string().required(),
+        NOSQL_HOST: Joi.string().default('localhost').required(),
+        NOSQL_PORT: Joi.number().port().default(27017).required(),
+
+        // Cache Database Config
         CACHE_HOST: Joi.string().default('localhost').required(),
         CACHE_PORT: Joi.number().port().default(6379).required(),
+
+        // Encrypt Config
         ENCRYPT_SALT: Joi.string().required(),
+
+        // JWT Config
         JWT_SECRET: Joi.string().required(),
         JWT_EXPIRES_IN: Joi.string().default('360s').required(),
       }),
@@ -49,6 +68,9 @@ import { RestaurantsModule } from './restaurants/restaurants.module';
       //  Apenas para evitar migrations, no momento
       synchronize: true,
     }),
+    MongooseModule.forRoot(
+      `${process.env.NOSQL_DB}://${process.env.NOSQL_USER}:${process.env.NOSQL_PASSWORD}@mongo:${process.env.NOSQL_PORT}/nest`,
+    ),
     CacheModule.register({
       max: 64,
       isGlobal: true,
@@ -75,6 +97,9 @@ import { RestaurantsModule } from './restaurants/restaurants.module';
     UsersModule,
     AuthModule,
     RestaurantsModule,
+    IngredientsModule,
+    ItemsModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [

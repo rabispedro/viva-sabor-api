@@ -68,6 +68,13 @@ export class UsersService {
     return { ...user, roles: [] };
   }
 
+  async changeActive(id: UUID, flag: boolean): Promise<UserResponseDto> {
+    const user = await this.usersRepository.findOneBy({ id: id });
+    await this.usersRepository.save({ ...user, isActive: flag });
+
+    return { ...user, id: id } as UserResponseDto;
+  }
+
   async update(id: UUID, updateUserDto: UpdateUserDto): Promise<UUID> {
     const user = await this.usersRepository.save(updateUserDto);
 

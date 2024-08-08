@@ -25,12 +25,14 @@ async function bootstrap() {
       'API monolítica Viva Sabor para a plataforma de gastronomia do desafio Grão Direto',
     )
     .setVersion('1.0.0')
-    .addTag('users')
+    .addTag('app')
     .addTag('auth')
-    .addTag('restaurants')
-    .addTag('items')
     .addTag('ingredients')
-    .addBearerAuth()
+    .addTag('items')
+    .addTag('orders')
+    .addTag('restaurants')
+    .addTag('users')
+    .addBearerAuth({ type: 'apiKey' })
     .build();
 
   const document = SwaggerModule.createDocument(app, documentConfig, {
