@@ -45,6 +45,12 @@ import { OrdersModule } from './orders/orders.module';
         CACHE_HOST: Joi.string().default('localhost').required(),
         CACHE_PORT: Joi.number().port().default(6379).required(),
 
+        // Bucket Database Config
+        BUCKET_HOST: Joi.string().required().default('localhost'),
+        BUCKET_PORT: Joi.string().required().default(80),
+        BUCKET_ACCESS_KEY: Joi.string().required(),
+        BUCKET_SECRET_KEY: Joi.string().required(),
+
         // Encrypt Config
         ENCRYPT_SALT: Joi.string().required(),
 
@@ -110,4 +116,4 @@ import { OrdersModule } from './orders/orders.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
