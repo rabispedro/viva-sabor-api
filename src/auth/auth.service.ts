@@ -4,7 +4,7 @@ import { AuthLoginDto } from './dto/auth-login.dto';
 import { compare } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { AuthTokenResponseDto } from './dto/auth-token-response.dto';
-import { UserResponseDto } from 'src/users/dto/user-response.dto';
+import { ResponseUserDto } from 'src/users/dto/response-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +14,7 @@ export class AuthService {
   ) {}
 
   async signIn(authLoginDto: AuthLoginDto): Promise<AuthTokenResponseDto> {
-    const user: UserResponseDto = await this.usersService.findByEmail(
+    const user: ResponseUserDto = await this.usersService.findByEmail(
       authLoginDto.email,
     );
 

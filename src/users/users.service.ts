@@ -2,17 +2,19 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UUID } from 'crypto';
 import { User } from './entities/user.entity';
-import { UserResponseDto } from './dto/user-response.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { hashSync } from 'bcrypt';
+import { compare, hashSync } from 'bcrypt';
 import { ListResponseDto } from 'src/shared/dtos/list-response.dto';
 import { UsersMapper } from './mappers/users.mapper';
+import { ChangePasswordUserDto } from './dto/change-password-user.dto';
+import { ResponseUserDto } from './dto/response-user.dto';
 // import * as Minio from 'minio';
 // import { TypedClient } from 'minio/dist/main/internal/client';
 
@@ -33,7 +35,7 @@ export class UsersService {
     // });
   }
 
-  async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
+  async create(createUserDto: CreateUserDto): Promise<ResponseUserDto> {
     createUserDto.password = hashSync(
       createUserDto.password,
       process.env.ENCRYPT_SALT!,
@@ -46,7 +48,7 @@ export class UsersService {
     return UsersMapper.map(user);
   }
 
-  async findAll(): Promise<ListResponseDto<UserResponseDto>> {
+  async findAll(): Promise<ListResponseDto<ResponseUserDto>> {
     const users: User[] = await this.usersRepository.find({
       relations: {
         roles: true,
@@ -60,14 +62,14 @@ export class UsersService {
 
     users.forEach((user: User) => (user.password = ''));
 
-    const response: UserResponseDto[] = users.map((user: User) =>
+    const response: ResponseUserDto[] = users.map((user: User) =>
       UsersMapper.map(user),
     );
 
-    return new ListResponseDto<UserResponseDto>([...response], 100, 0, 10);
+    return new ListResponseDto<ResponseUserDto>([...response], 100, 0, 10);
   }
 
-  async findById(id: UUID, ommitPassword?: boolean): Promise<UserResponseDto> {
+  async findById(id: UUID, ommitPassword?: boolean): Promise<ResponseUserDto> {
     const user: User | null = await this.usersRepository.findOne({
       where: {
         id: id,
@@ -89,7 +91,7 @@ export class UsersService {
   async findByEmail(
     email: string,
     ommitPassword?: boolean,
-  ): Promise<UserResponseDto> {
+  ): Promise<ResponseUserDto> {
     const user: User | null = await this.usersRepository.findOne({
       where: {
         email: email,
@@ -108,7 +110,7 @@ export class UsersService {
     return UsersMapper.map(user);
   }
 
-  async changeActive(id: UUID, flag: boolean): Promise<UserResponseDto> {
+  async changeActive(id: UUID, flag: boolean): Promise<ResponseUserDto> {
     let user: User | null = await this.usersRepository.findOneBy({ id: id });
 
     if (!user)
@@ -156,7 +158,7 @@ export class UsersService {
   async uploadProfileImage(
     id: UUID,
     profileImageUrl: Express.Multer.File,
-  ): Promise<UserResponseDto> {
+  ): Promise<ResponseUserDto> {
     let user: User | null = await this.usersRepository.findOneBy({ id: id });
 
     if (!user)
@@ -179,6 +181,37 @@ export class UsersService {
     user.password = '';
 
     return UsersMapper.map(user);
+  }
+
+  async changePassword(
+    id: UUID,
+    changePasswordUserDto: ChangePasswordUserDto,
+  ): Promise<boolean> {
+    const user: User | null = await this.usersRepository.findOne({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!user || !user.password)
+      throw new NotFoundException('User with this id could not be found');
+
+    const passwordMatch: boolean = await compare(
+      changePasswordUserDto.oldPassword,
+      user.password,
+    );
+
+    if (!passwordMatch) throw new UnauthorizedException('Wrong credentials');
+
+    const newPassword: string = hashSync(
+      changePasswordUserDto.newPassword,
+      process.env.ENCRYPT_SALT!,
+    );
+
+    user.password = newPassword;
+    await this.usersRepository.save(user);
+
+    return true;
   }
 
   // private setupBucket(): Promise<Void> {

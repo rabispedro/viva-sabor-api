@@ -8,7 +8,6 @@ import {
   Delete,
   ParseUUIDPipe,
   UseGuards,
-  // UseInterceptors,
   Put,
   ParseBoolPipe,
   UseInterceptors,
@@ -22,16 +21,21 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ValidationPipe } from 'src/shared/pipes/validation.pipe';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
-// import { CacheInterceptor } from '@nestjs/cache-manager';
-import { UserResponseDto } from './dto/user-response.dto';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { UUID } from 'crypto';
 import { PublicRoute } from 'src/shared/decorators/public-route.decorator';
 import { Roles } from 'src/shared/decorators/roles.decorator';
 import { ListResponseDto } from 'src/shared/dtos/list-response.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { binary } from 'joi';
-import { Binary } from 'typeorm';
+import { ChangePasswordUserDto } from './dto/change-password-user.dto';
+import { ResponseUserDto } from './dto/response-user.dto';
 
 @Controller('users')
 // @UseInterceptors(CacheInterceptor)
@@ -43,27 +47,27 @@ export class UsersController {
 
   @Post()
   @PublicRoute()
-  @ApiResponse({ type: UserResponseDto })
+  @ApiResponse({ type: ResponseUserDto })
   async create(
     @Body(ValidationPipe) createUserDto: CreateUserDto,
-  ): Promise<UserResponseDto> {
+  ): Promise<ResponseUserDto> {
     return await this.usersService.create(createUserDto);
   }
 
   @Get()
   @Roles(['admin', 'manager'])
-  @ApiResponse({ type: ListResponseDto<UserResponseDto> })
-  async findAll(): Promise<ListResponseDto<UserResponseDto>> {
+  @ApiResponse({ type: ListResponseDto<ResponseUserDto> })
+  async findAll(): Promise<ListResponseDto<ResponseUserDto>> {
     return await this.usersService.findAll();
   }
 
   @Get(':id')
   @Roles(['admin', 'manager'])
   @ApiParam({ name: 'id' })
-  @ApiResponse({ type: UserResponseDto })
+  @ApiResponse({ type: ResponseUserDto })
   async findById(
     @Param('id', ParseUUIDPipe) id: UUID,
-  ): Promise<UserResponseDto> {
+  ): Promise<ResponseUserDto> {
     return await this.usersService.findById(id, true);
   }
 
@@ -82,11 +86,11 @@ export class UsersController {
   @Roles(['admin', 'manager'])
   @ApiParam({ name: 'id' })
   @ApiParam({ name: 'flag' })
-  @ApiResponse({ type: UserResponseDto })
+  @ApiResponse({ type: ResponseUserDto })
   async changeActive(
     @Param('id', ParseUUIDPipe) id: UUID,
     @Param('flag', ParseBoolPipe) flag: boolean,
-  ): Promise<UserResponseDto> {
+  ): Promise<ResponseUserDto> {
     return await this.usersService.changeActive(id, flag);
   }
 
@@ -106,6 +110,17 @@ export class UsersController {
     return await this.usersService.restore(id);
   }
 
+  @Patch(':id/change-password')
+  @ApiParam({ name: 'id' })
+  @ApiBody({ type: ChangePasswordUserDto })
+  @ApiResponse({ type: Boolean })
+  async changePassword(
+    @Param('id', ParseUUIDPipe) id: UUID,
+    @Body() changePasswordUserDto: ChangePasswordUserDto,
+  ): Promise<boolean> {
+    return await this.usersService.changePassword(id, changePasswordUserDto);
+  }
+
   @Post(':id/upload-profile-image')
   @UseInterceptors(FileInterceptor('profileImage'))
   @ApiParam({ name: 'id' })
@@ -121,7 +136,7 @@ export class UsersController {
       },
     },
   })
-  @ApiResponse({ type: UserResponseDto })
+  @ApiResponse({ type: ResponseUserDto })
   async uploadProfileImage(
     @Param('id', ParseUUIDPipe) id: UUID,
     @UploadedFile(
@@ -133,7 +148,7 @@ export class UsersController {
       }),
     )
     profileImage: Express.Multer.File,
-  ): Promise<UserResponseDto> {
+  ): Promise<ResponseUserDto> {
     return await this.usersService.uploadProfileImage(id, profileImage);
   }
 }
