@@ -11,23 +11,23 @@ services:
     networks:
       - localnet
 
-  bucket:
-    image: bitnami/minio:2024.8.3
-    container_name: bucket-minio-db
-    restart: always
-    ports:
-      - 9000:9000
-      - 9001:9001
-    mem_limit: 1Gb
-    cpu_percent: 5
-    volumes:
-      - ./compose/data/buckets:/bitnami/minio/data
-    environment:
-      - MINIO_ROOT_USER=viva-sabor
-      - MINIO_ROOT_PASSWORD=Viva_Sabor@123
-      - MINIO_DEFAULT_BUCKETS='images,videos'
-    networks:
-      - localnet
+  # bucket:
+  #   image: bitnami/minio:2024.8.3
+  #   container_name: bucket-minio-db
+  #   restart: always
+  #   ports:
+  #     - 9000:9000
+  #     - 9001:9001
+  #   mem_limit: 1Gb
+  #   cpu_percent: 5
+  #   volumes:
+  #     - ./compose/data/buckets:/bitnami/minio/data
+  #   environment:
+  #     - MINIO_ROOT_USER=viva-sabor
+  #     - MINIO_ROOT_PASSWORD=Viva_Sabor@123
+  #     - MINIO_DEFAULT_BUCKETS='images,videos'
+  #   networks:
+  #     - localnet
 
   # bucket-client:
   #   image: bitnami/minio-client:2024.7.31

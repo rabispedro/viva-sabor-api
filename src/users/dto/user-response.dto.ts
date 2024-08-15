@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UUID } from 'crypto';
-import { Role } from '../entities/roles.entity';
+import { Role } from 'src/roles/entities/role.entity';
 
 export class UserResponseDto {
   @ApiProperty()

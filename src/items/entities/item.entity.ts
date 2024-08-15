@@ -1,5 +1,4 @@
 import { UUID } from 'crypto';
-import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import {
   Column,
   CreateDateColumn,
@@ -20,8 +19,8 @@ export class Item {
   @Column()
   description: string;
 
-  @ManyToOne(() => Restaurant, (restaurant) => restaurant.items)
-  restaurant: Restaurant;
+  // @ManyToOne(() => Restaurant, (restaurant) => restaurant.items)
+  // restaurant: Restaurant;
 
   @Column()
   price: number;

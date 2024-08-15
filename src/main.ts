@@ -31,6 +31,7 @@ async function bootstrap() {
     .addTag('items')
     .addTag('orders')
     .addTag('restaurants')
+    .addTag('roles')
     .addTag('users')
     .addBearerAuth({ type: 'apiKey' })
     .build();

@@ -8,7 +8,7 @@ import {
   Delete,
   ParseUUIDPipe,
   UseGuards,
-  UseInterceptors,
+  // UseInterceptors,
   Put,
   ParseBoolPipe,
 } from '@nestjs/common';
@@ -24,6 +24,7 @@ import { ApiBearerAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UUID } from 'crypto';
 import { PublicRoute } from 'src/shared/decorators/public-route.decorator';
 import { Roles } from 'src/shared/decorators/roles.decorator';
+import { ListResponseDto } from 'src/shared/dtos/list-response.dto';
 
 @Controller('users')
 // @UseInterceptors(CacheInterceptor)
@@ -43,13 +44,14 @@ export class UsersController {
   }
 
   @Get()
-  @Roles(['admin', 'manager', ''])
-  @ApiResponse({ type: UserResponseDto })
+  @Roles(['admin', 'manager'])
+  @ApiResponse({ type: ListResponseDto<UserResponseDto> })
   async findAll(): Promise<UserResponseDto[]> {
     return await this.usersService.findAll(true);
   }
 
   @Get(':id')
+  @Roles(['admin', 'manager'])
   @ApiParam({ name: 'id' })
   @ApiResponse({ type: UserResponseDto })
   async findById(
@@ -59,7 +61,7 @@ export class UsersController {
   }
 
   @Put(':id')
-  // @Roles(['admin', 'manager'])
+  @Roles(['admin', 'manager', 'employee', 'client'])
   @ApiParam({ name: 'id' })
   @ApiResponse({ type: String })
   async update(
@@ -70,6 +72,7 @@ export class UsersController {
   }
 
   @Patch(':id/active/:flag')
+  @Roles(['admin', 'manager'])
   @ApiParam({ name: 'id' })
   @ApiParam({ name: 'flag' })
   @ApiResponse({ type: UserResponseDto })
@@ -81,7 +84,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  // @Roles(['admin', 'manager'])
+  @Roles(['admin', 'manager'])
   @ApiParam({ name: 'id' })
   @ApiResponse({ type: String })
   async remove(@Param('id', ParseUUIDPipe) id: UUID): Promise<UUID> {

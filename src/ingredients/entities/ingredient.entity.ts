@@ -1,6 +1,6 @@
-import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 import { UUID } from 'crypto';
-import { Order } from 'src/orders/schemas/order.entity';
+// import { Order } from 'src/orders/schemas/order.entity';
 
 @Entity('Ingredient')
 export class Ingredient {
@@ -13,8 +13,8 @@ export class Ingredient {
   @Column()
   aditionalPrice: number;
 
-  @ManyToOne(() => Order, (order) => order.aditionals)
-  order: Order;
+  // @ManyToOne(() => Order, (order) => order.aditionals)
+  // order: Order;
 
   constructor() {
     if (!this.id) this.id = crypto.randomUUID();

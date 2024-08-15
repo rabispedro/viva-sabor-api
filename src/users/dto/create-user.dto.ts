@@ -8,7 +8,7 @@ import {
   IsString,
   IsUrl,
 } from 'class-validator';
-import { Role } from '../entities/roles.entity';
+import { Role } from 'src/roles/entities/role.entity';
 
 export class CreateUserDto {
   @ApiProperty()

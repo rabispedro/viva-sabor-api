@@ -29,10 +29,10 @@ import { RestaurantResponseDto } from './dto/restaurant-response.dto';
 @ApiTags('restaurants')
 @ApiBearerAuth()
 export class RestaurantsController {
-  constructor(private readonly restaurantsService: RestaurantsService) { }
+  constructor(private readonly restaurantsService: RestaurantsService) {}
 
   @Post()
-  // @Roles(['admin', 'manager'])
+  @Roles(['admin', 'manager'])
   @ApiResponse({ type: RestaurantResponseDto })
   async create(
     @Body(ValidationPipe) createRestaurantDto: CreateRestaurantDto,
@@ -40,47 +40,47 @@ export class RestaurantsController {
     return await this.restaurantsService.create(createRestaurantDto);
   }
 
-  @Get()
-  // @ApiResponse()
-  async findAll(): Promise<RestaurantResponseDto[]> {
-    return await this.restaurantsService.findAll();
-  }
+  // @Get()
+  // // @ApiResponse()
+  // async findAll(): Promise<RestaurantResponseDto[]> {
+  //   return await this.restaurantsService.findAll();
+  // }
 
-  @Get(':id')
-  @ApiParam({ name: 'id' })
-  // @ApiResponse({ type: RestaurantResponseDto })
-  async findById(
-    @Param('id', ParseUUIDPipe) id: UUID,
-  ): Promise<RestaurantResponseDto> {
-    return await this.restaurantsService.findById(id);
-  }
+  // @Get(':id')
+  // @ApiParam({ name: 'id' })
+  // // @ApiResponse({ type: RestaurantResponseDto })
+  // async findById(
+  //   @Param('id', ParseUUIDPipe) id: UUID,
+  // ): Promise<RestaurantResponseDto> {
+  //   return await this.restaurantsService.findById(id);
+  // }
 
-  @Put(':id')
-  @ApiParam({ name: 'id' })
-  async update(
-    @Param('id', ParseUUIDPipe) id: UUID,
-    @Body(ValidationPipe) updateRestaurantDto: UpdateRestaurantDto,
-  ): Promise<UUID> {
-    return await this.restaurantsService.update(id, updateRestaurantDto);
-  }
+  // @Put(':id')
+  // @ApiParam({ name: 'id' })
+  // async update(
+  //   @Param('id', ParseUUIDPipe) id: UUID,
+  //   @Body(ValidationPipe) updateRestaurantDto: UpdateRestaurantDto,
+  // ): Promise<UUID> {
+  //   return await this.restaurantsService.update(id, updateRestaurantDto);
+  // }
 
-  @Patch(':id/active/:flag')
-  // @Roles(['admin', 'manager'])
-  @ApiParam({ name: 'id' })
-  @ApiParam({ name: 'flag' })
-  // @ApiResponse()
-  async changeActive(
-    @Param('id', ParseUUIDPipe) id: UUID,
-    @Param('flag', ParseBoolPipe) flag: boolean,
-  ): Promise<RestaurantResponseDto> {
-    return await this.restaurantsService.changeActive(id, flag);
-  }
+  // @Patch(':id/active/:flag')
+  // // @Roles(['admin', 'manager'])
+  // @ApiParam({ name: 'id' })
+  // @ApiParam({ name: 'flag' })
+  // // @ApiResponse()
+  // async changeActive(
+  //   @Param('id', ParseUUIDPipe) id: UUID,
+  //   @Param('flag', ParseBoolPipe) flag: boolean,
+  // ): Promise<RestaurantResponseDto> {
+  //   return await this.restaurantsService.changeActive(id, flag);
+  // }
 
-  @Delete(':id')
-  // @Roles(['admin', 'manager'])
-  @ApiParam({ name: 'id' })
-  // @ApiResponse()
-  async remove(@Param('id', ParseUUIDPipe) id: UUID): Promise<UUID> {
-    return await this.restaurantsService.remove(id);
-  }
+  // @Delete(':id')
+  // // @Roles(['admin', 'manager'])
+  // @ApiParam({ name: 'id' })
+  // // @ApiResponse()
+  // async remove(@Param('id', ParseUUIDPipe) id: UUID): Promise<UUID> {
+  //   return await this.restaurantsService.remove(id);
+  // }
 }

@@ -1,4 +1,5 @@
 import { UUID } from 'crypto';
+import { Role } from 'src/roles/entities/role.entity';
 import {
   Column,
   CreateDateColumn,
@@ -8,7 +9,6 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Role } from './roles.entity';
 
 @Entity('User')
 export class User {

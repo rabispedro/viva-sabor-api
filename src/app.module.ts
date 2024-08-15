@@ -15,6 +15,8 @@ import { RestaurantsModule } from './restaurants/restaurants.module';
 import { IngredientsModule } from './ingredients/ingredients.module';
 import { ItemsModule } from './items/items.module';
 import { OrdersModule } from './orders/orders.module';
+import { RolesModule } from './roles/roles.module';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
@@ -75,7 +77,8 @@ import { OrdersModule } from './orders/orders.module';
       synchronize: true,
     }),
     MongooseModule.forRoot(
-      `${process.env.NOSQL_DB}://${process.env.NOSQL_USER}:${process.env.NOSQL_PASSWORD}@mongo:${process.env.NOSQL_PORT}/nest`,
+      // `${process.env.NOSQL_DB}://${process.env.NOSQL_USER}:${process.env.NOSQL_PASSWORD}@mongo:${process.env.NOSQL_PORT}/nest`,
+      `${process.env.NOSQL_DB}://${process.env.NOSQL_HOST}:${process.env.NOSQL_PORT}`,
     ),
     CacheModule.register({
       max: 64,
@@ -106,6 +109,7 @@ import { OrdersModule } from './orders/orders.module';
     IngredientsModule,
     ItemsModule,
     OrdersModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [
@@ -116,4 +120,4 @@ import { OrdersModule } from './orders/orders.module';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

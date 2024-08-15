@@ -10,7 +10,6 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Item } from './item.entity';
 
 @Entity('Restaurant')
 export class Restaurant {
@@ -36,8 +35,8 @@ export class Restaurant {
   @JoinColumn()
   managers: User[];
 
-  @OneToMany(() => Item, (item) => item.restaurant)
-  items: Item[];
+  // @OneToMany(() => Item, (item) => item.restaurant)
+  // items: Item[];
 
   @Column()
   minimumFee: number;
