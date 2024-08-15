@@ -40,7 +40,7 @@ export class User {
   @Column({ name: 'profile_image_url', nullable: true })
   profileImageUrl?: string;
 
-  @Column({ name: 'is_active', nullable: false })
+  @Column({ name: 'is_active', nullable: false, default: true })
   isActive: boolean;
 
   @UpdateDateColumn({ name: 'updated_at' })

@@ -131,18 +131,22 @@ export class AppModule {
       .into(Role)
       .values([
         {
+          id: '9ed0923a-6c22-42e0-85af-76ff9781cdca',
           name: 'admin',
           description: 'Permite total controle do sistema.',
         },
         {
+          id: 'a9291625-3475-453c-8e06-888ccf1434b0',
           name: 'manager',
           description: 'Permite controles do gerente.',
         },
         {
+          id: '285035f3-a2d5-4a26-8c93-3361d60ec3ed',
           name: 'employee',
           description: 'Permite controles do empregado.',
         },
         {
+          id: 'c9d5b839-1ea1-4242-9b4c-d7578eade02c',
           name: 'client',
           description: 'Permite controles do cliente do app.',
         },
@@ -156,59 +160,67 @@ export class AppModule {
       .into(User)
       .values([
         {
+          id: '5119a9bf-aec7-42e1-8123-e2ad4c5449b0',
           firstName: 'Fred',
           lastName: 'Grão Direto',
           password: '$2b$10$1wOJ70S1....PcETDuHsO.LbLdCTKcEtl.OjLuTTGJu7UNNNrd0oi', //vivasabor123
-          roles: () => 'admin',
           birthDate: '2000-01-02',
           email: 'fred@graodireto.com.br',
           phoneNumber: '+5511985654515',
-          profileImageUrl: '',
-          isActive: true,
-          updatedAt: new Date().toUTCString(),
-          createdAt: new Date().toUTCString(),
         },
         {
+          id: '6e04803e-b1fd-4cf2-a635-9f07f137aa65',
           firstName: 'Albert',
           lastName: 'Wesker',
           password: '$2b$10$1wOJ70S1....PcETDuHsO.LbLdCTKcEtl.OjLuTTGJu7UNNNrd0oi', //vivasabor123
-          roles: () => 'manager',
           birthDate: '1985-01-02',
           email: 'albert@mail.com',
           phoneNumber: '+5511915935784',
-          profileImageUrl: '',
-          isActive: true,
-          updatedAt: new Date().toUTCString(),
-          createdAt: new Date().toUTCString(),
         },
         {
+          id: 'cc624950-2644-4e64-9fb3-87adb2f7e208',
           firstName: 'Alex',
           lastName: 'André',
           password: '$2b$10$1wOJ70S1....PcETDuHsO.LbLdCTKcEtl.OjLuTTGJu7UNNNrd0oi', //vivasabor123
-          roles: () => 'employee',
           birthDate: '2020-10-02',
           email: 'alex@mail.com',
           phoneNumber: '+5511914725874',
-          profileImageUrl: '',
-          isActive: true,
-          updatedAt: new Date().toUTCString(),
-          createdAt: new Date().toUTCString(),
         },
         {
+          id: '81913100-9e53-43a6-8b1c-e74661249806',
           firstName: 'Rita',
           lastName: 'Lee',
           password: '$2b$10$1wOJ70S1....PcETDuHsO.LbLdCTKcEtl.OjLuTTGJu7UNNNrd0oi', //vivasabor123
-          roles: () => 'client',
           birthDate: '1990-02-11',
           email: 'rita@mail.com',
           phoneNumber: '+5511933223223',
-          profileImageUrl: '',
-          isActive: true,
-          updatedAt: new Date().toUTCString(),
-          createdAt: new Date().toUTCString(),
         },
       ])
       .orIgnore()
       .execute();
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(User, 'roles')
+      .of('5119a9bf-aec7-42e1-8123-e2ad4c5449b0')
+      .add('9ed0923a-6c22-42e0-85af-76ff9781cdca');
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(User, 'roles')
+      .of('6e04803e-b1fd-4cf2-a635-9f07f137aa65')
+      .add('a9291625-3475-453c-8e06-888ccf1434b0');
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(User, 'roles')
+      .of('cc624950-2644-4e64-9fb3-87adb2f7e208')
+      .add('285035f3-a2d5-4a26-8c93-3361d60ec3ed');
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(User, 'roles')
+      .of('81913100-9e53-43a6-8b1c-e74661249806')
+      .add('c9d5b839-1ea1-4242-9b4c-d7578eade02c');
   }
 }
