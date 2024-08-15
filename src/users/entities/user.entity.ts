@@ -1,20 +1,9 @@
-import { UUID } from 'crypto';
 import { Role } from 'src/roles/entities/role.entity';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Auditable } from 'src/shared/entities/auditable.entity';
+import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 
 @Entity('User')
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: UUID;
-
+export class User extends Auditable {
   @Column({ name: 'first_name', nullable: false })
   firstName: string;
 
@@ -40,16 +29,6 @@ export class User {
   @Column({ name: 'profile_image_url', nullable: true })
   profileImageUrl?: string;
 
-  @Column({ name: 'is_active', nullable: false, default: true })
+  @Column({ name: 'is_active', nullable: false, default: true, select: false })
   isActive: boolean;
-
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
-
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
-
-  constructor() {
-    if (!this.id) this.id = crypto.randomUUID();
-  }
 }

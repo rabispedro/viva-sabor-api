@@ -3,6 +3,7 @@ import {
   IsArray,
   IsDateString,
   IsEmail,
+  IsEmpty,
   IsOptional,
   IsPhoneNumber,
   IsString,
@@ -25,6 +26,7 @@ export class CreateUserDto {
 
   @ApiProperty()
   @IsArray()
+  @IsEmpty()
   roles: Role[];
 
   @ApiProperty()

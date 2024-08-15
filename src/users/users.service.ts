@@ -11,13 +11,27 @@ import { UserResponseDto } from './dto/user-response.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { hashSync } from 'bcrypt';
+import { ListResponseDto } from 'src/shared/dtos/list-response.dto';
+import { UsersMapper } from './mappers/users.mapper';
+// import * as Minio from 'minio';
+// import { TypedClient } from 'minio/dist/main/internal/client';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-  ) {}
+
+    // private readonly minioRepository: TypedClient,
+  ) {
+    // this.minioRepository = new Minio.Client({
+    //   endPoint: process.env.BUCKET_HOST!,
+    //   port: Number(process.env.BUCKET_PORT!),
+    //   useSSL: false,
+    //   accessKey: process.env.BUCKET_ACCESS_KEY!,
+    //   secretKey: process.env.BUCKET_SECRET_KEY!,
+    // });
+  }
 
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
     createUserDto.password = hashSync(
@@ -25,60 +39,88 @@ export class UsersService {
       process.env.ENCRYPT_SALT!,
     );
 
-    const result = this.usersRepository.create(createUserDto);
-    await this.usersRepository.save(result);
+    const user: User = this.usersRepository.create(createUserDto);
+    await this.usersRepository.save(user);
 
-    return { ...result, password: '' };
+    user.password = '';
+    return UsersMapper.map(user);
   }
 
-  async findAll(ommitPassword?: boolean): Promise<UserResponseDto[]> {
-    const users = await this.usersRepository.find();
+  async findAll(): Promise<ListResponseDto<UserResponseDto>> {
+    const users: User[] = await this.usersRepository.find({
+      relations: {
+        roles: true,
+      },
+      cache: true,
+      // skip: 1,
+    });
 
     if (!users || users.length === 0)
-      throw new NotFoundException('Users cannot be found');
+      throw new NotFoundException('Users could not be found');
 
-    if (ommitPassword === true)
-      users.forEach((user: User) => (user.password = ''));
+    users.forEach((user: User) => (user.password = ''));
 
-    console.log('Users: ', users);
+    const response: UserResponseDto[] = users.map((user: User) =>
+      UsersMapper.map(user),
+    );
 
-    return [];
+    return new ListResponseDto<UserResponseDto>([...response], 100, 0, 10);
   }
 
   async findById(id: UUID, ommitPassword?: boolean): Promise<UserResponseDto> {
-    const user: User | null = await this.usersRepository.findOneBy({ id: id });
+    const user: User | null = await this.usersRepository.findOne({
+      where: {
+        id: id,
+      },
+      relations: {
+        roles: true,
+      },
+      cache: true,
+    });
 
-    if (!user) throw new NotFoundException('User with this id not found');
+    if (!user)
+      throw new NotFoundException('User with this id could not be found');
 
     if (ommitPassword === true) user.password = '';
 
-    return { ...user, roles: [] };
+    return UsersMapper.map(user);
   }
 
   async findByEmail(
     email: string,
     ommitPassword?: boolean,
   ): Promise<UserResponseDto> {
-    const user: User | null = await this.usersRepository.findOneBy({
-      email: email,
+    const user: User | null = await this.usersRepository.findOne({
+      where: {
+        email: email,
+      },
+      relations: {
+        roles: true,
+      },
+      cache: true,
     });
 
-    if (!user) throw new NotFoundException('User with this email not found');
+    if (!user)
+      throw new NotFoundException('User with this email could not be found');
 
     if (ommitPassword === true) user.password = '';
 
-    return { ...user, roles: [] };
+    return UsersMapper.map(user);
   }
 
   async changeActive(id: UUID, flag: boolean): Promise<UserResponseDto> {
-    const user = await this.usersRepository.findOneBy({ id: id });
-    await this.usersRepository.save({ ...user, isActive: flag });
+    let user: User | null = await this.usersRepository.findOneBy({ id: id });
 
-    return { ...user, id: id } as UserResponseDto;
+    if (!user)
+      throw new NotFoundException('User with this id could not be found');
+
+    user = await this.usersRepository.save({ ...user, isActive: flag });
+
+    return UsersMapper.map(user);
   }
 
   async update(id: UUID, updateUserDto: UpdateUserDto): Promise<UUID> {
-    const user = await this.usersRepository.save(updateUserDto);
+    const user: User = await this.usersRepository.save(updateUserDto);
 
     if (!user) throw new BadRequestException('User could not be updated');
 
@@ -86,10 +128,62 @@ export class UsersService {
   }
 
   async remove(id: UUID): Promise<UUID> {
-    const result = (await this.usersRepository.delete(id)).affected;
+    const result: number | null | undefined = (
+      await this.usersRepository.softDelete({
+        id: id,
+      })
+    ).affected;
 
-    if (!result || result === 0) throw new NotFoundException('User not found');
+    if (!result || result === 0)
+      throw new BadRequestException('User could not be deleted');
 
     return id;
   }
+
+  async restore(id: UUID): Promise<UUID> {
+    const result = (
+      await this.usersRepository.restore({
+        id: id,
+      })
+    ).affected;
+
+    if (!result || result === 0)
+      throw new BadRequestException('User could not be restored');
+
+    return id;
+  }
+
+  async uploadProfileImage(
+    id: UUID,
+    profileImageUrl: Express.Multer.File,
+  ): Promise<UserResponseDto> {
+    let user: User | null = await this.usersRepository.findOneBy({ id: id });
+
+    if (!user)
+      throw new NotFoundException('User could not update profile photo');
+
+    const profileImageName = `${id}-${new Date().toISOString()}.${profileImageUrl.mimetype.replace('image/', '')}`;
+
+    // await this.minioRepository.putObject(
+    //   'users',
+    //   profileImageName,
+    //   profileImageUrl.buffer,
+    // );
+
+    console.info('[USER]:', user);
+    console.info('[profileImageName]:', profileImageName);
+    user = await this.usersRepository.save({
+      ...user,
+      profileImageUrl: profileImageName,
+    });
+    user.password = '';
+
+    return UsersMapper.map(user);
+  }
+
+  // private setupBucket(): Promise<Void> {
+  // const userBucketExists = await this.minioRepository.bucketExists('users');
+  // if (!userBucketExists) await this.minioRepository.makeBucket('users');
+  // return;
+  // }
 }

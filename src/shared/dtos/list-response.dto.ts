@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class ListResponseDto<T> {
   @ApiProperty()
@@ -6,6 +6,9 @@ export class ListResponseDto<T> {
 
   @ApiProperty()
   quantityItems: number;
+
+  @ApiProperty()
+  quantityPerPage: number;
 
   @ApiProperty()
   totalItems: number;
@@ -28,12 +31,13 @@ export class ListResponseDto<T> {
     currentPage: number,
     quantityPerPage: number,
   ) {
-    this.quantityItems = items.length;
-    this.totalItems = totalItems;
+    this.items = items;
+    this.quantityItems = this.items.length;
+    this.quantityPerPage = quantityPerPage;
     this.currentPage = currentPage;
-
-    this.totalPages = this.totalItems / quantityPerPage;
+    this.totalItems = totalItems;
+    this.totalPages = this.totalItems / quantityPerPage - 1;
     this.isEmpty = this.quantityItems === 0;
-    this.hasNext = this.currentPage === this.totalPages;
+    this.hasNext = this.currentPage < this.totalPages;
   }
 }
