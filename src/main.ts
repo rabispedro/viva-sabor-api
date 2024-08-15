@@ -6,6 +6,11 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { IngredientsModule } from './ingredients/ingredients.module';
+import { ItemsModule } from './items/items.module';
+import { OrdersModule } from './orders/orders.module';
+import { RestaurantsModule } from './restaurants/restaurants.module';
+import { RolesModule } from './roles/roles.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { abortOnError: false });
@@ -33,11 +38,19 @@ async function bootstrap() {
     .addTag('restaurants')
     .addTag('roles')
     .addTag('users')
-    .addBearerAuth({ type: 'apiKey' })
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, documentConfig, {
-    include: [AuthModule, UsersModule],
+    include: [
+      AuthModule,
+      IngredientsModule,
+      ItemsModule,
+      OrdersModule,
+      RestaurantsModule,
+      RolesModule,
+      UsersModule,
+    ],
     deepScanRoutes: true,
   });
   SwaggerModule.setup('swagger', app, document);

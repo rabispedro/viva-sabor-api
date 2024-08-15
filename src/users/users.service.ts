@@ -24,8 +24,12 @@ export class UsersService {
       createUserDto.password,
       process.env.ENCRYPT_SALT!,
     );
-    const result = this.usersRepository.create(createUserDto);
+    const result = this.usersRepository.create({
+      ...createUserDto,
+      isActive: true,
+    });
     await this.usersRepository.save(result);
+
     return { ...result, password: '', roles: [] };
   }
 

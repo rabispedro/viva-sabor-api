@@ -6,47 +6,47 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity('User')
 export class User {
-  @PrimaryColumn('uuid')
+  @PrimaryGeneratedColumn('uuid')
   id: UUID;
 
-  @Column()
+  @Column({ name: 'first_name', nullable: false })
   firstName: string;
 
-  @Column()
+  @Column({ name: 'last_name', nullable: false })
   lastName: string;
 
-  @Column()
+  @Column({ name: 'password', nullable: false })
   password: string;
 
   @ManyToMany(() => Role)
   @JoinTable()
   roles: Role[];
 
-  @Column()
+  @Column({ name: 'birth_date', nullable: false })
   birthDate: Date;
 
-  @Column()
+  @Column({ name: 'email', nullable: false, unique: true })
   email: string;
 
-  @Column()
+  @Column({ name: 'phone_number', nullable: true, unique: true })
   phoneNumber: string;
 
-  @Column()
-  imageUrl?: string;
+  @Column({ name: 'profile_image_url', nullable: true })
+  profileImageUrl?: string;
 
-  @Column()
+  @Column({ name: 'is_active', nullable: false })
   isActive: boolean;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
   constructor() {

@@ -1,0 +1,9 @@
+{
+  "firstName": "Jorge",
+  "lastName": "Jefferson",
+  "password": "vivasabor123",
+  "roles": [],
+  "birthDate": "2000-01-10",
+  "email": "jorge@mail.com",
+  "phoneNumber": "+5591101203050"
+}

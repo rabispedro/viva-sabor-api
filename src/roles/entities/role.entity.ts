@@ -1,21 +1,14 @@
 import { UUID } from 'crypto';
-import { Column, Entity, ManyToMany, PrimaryColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('Role')
 export class Role {
-  @PrimaryColumn('uuid')
+  @PrimaryGeneratedColumn('uuid')
   id: UUID;
 
-  @Column()
+  @Column({ name: 'name', nullable: false, unique: true })
   name: string;
 
-  @Column()
+  @Column({ name: 'description', nullable: true })
   description: string;
-
-  // @ManyToMany(() => User, (user: User) => user.roles)
-  // user: User;
-
-  constructor() {
-    if (!this.id) this.id = crypto.randomUUID();
-  }
 }

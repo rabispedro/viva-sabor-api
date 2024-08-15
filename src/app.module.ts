@@ -17,6 +17,9 @@ import { ItemsModule } from './items/items.module';
 import { OrdersModule } from './orders/orders.module';
 import { RolesModule } from './roles/roles.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { DataSource, DataSourceOptions } from 'typeorm';
+import { Role } from './roles/entities/role.entity';
+import { User } from './users/entities/user.entity';
 
 @Module({
   imports: [
@@ -73,7 +76,7 @@ import { MongooseModule } from '@nestjs/mongoose';
       password: process.env.SQL_PASSWORD,
       database: process.env.SQL_DB,
       autoLoadEntities: true,
-      //  Apenas para evitar migrations, no momento
+      logging: true,
       synchronize: true,
     }),
     MongooseModule.forRoot(
@@ -103,13 +106,13 @@ import { MongooseModule } from '@nestjs/mongoose';
         expiresIn: process.env.JWT_EXPIRES_IN,
       },
     }),
-    UsersModule,
     AuthModule,
-    RestaurantsModule,
     IngredientsModule,
     ItemsModule,
     OrdersModule,
+    RestaurantsModule,
     RolesModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [
@@ -120,4 +123,92 @@ import { MongooseModule } from '@nestjs/mongoose';
     },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(private readonly dataSource: DataSource) {
+    this.dataSource
+      .createQueryBuilder()
+      .insert()
+      .into(Role)
+      .values([
+        {
+          name: 'admin',
+          description: 'Permite total controle do sistema.',
+        },
+        {
+          name: 'manager',
+          description: 'Permite controles do gerente.',
+        },
+        {
+          name: 'employee',
+          description: 'Permite controles do empregado.',
+        },
+        {
+          name: 'client',
+          description: 'Permite controles do cliente do app.',
+        },
+      ])
+      .orIgnore()
+      .execute();
+
+    this.dataSource
+      .createQueryBuilder()
+      .insert()
+      .into(User)
+      .values([
+        {
+          firstName: 'Fred',
+          lastName: 'Grão Direto',
+          password: '$2b$10$1wOJ70S1....PcETDuHsO.LbLdCTKcEtl.OjLuTTGJu7UNNNrd0oi', //vivasabor123
+          roles: () => 'admin',
+          birthDate: '2000-01-02',
+          email: 'fred@graodireto.com.br',
+          phoneNumber: '+5511985654515',
+          profileImageUrl: '',
+          isActive: true,
+          updatedAt: new Date().toUTCString(),
+          createdAt: new Date().toUTCString(),
+        },
+        {
+          firstName: 'Albert',
+          lastName: 'Wesker',
+          password: '$2b$10$1wOJ70S1....PcETDuHsO.LbLdCTKcEtl.OjLuTTGJu7UNNNrd0oi', //vivasabor123
+          roles: () => 'manager',
+          birthDate: '1985-01-02',
+          email: 'albert@mail.com',
+          phoneNumber: '+5511915935784',
+          profileImageUrl: '',
+          isActive: true,
+          updatedAt: new Date().toUTCString(),
+          createdAt: new Date().toUTCString(),
+        },
+        {
+          firstName: 'Alex',
+          lastName: 'André',
+          password: '$2b$10$1wOJ70S1....PcETDuHsO.LbLdCTKcEtl.OjLuTTGJu7UNNNrd0oi', //vivasabor123
+          roles: () => 'employee',
+          birthDate: '2020-10-02',
+          email: 'alex@mail.com',
+          phoneNumber: '+5511914725874',
+          profileImageUrl: '',
+          isActive: true,
+          updatedAt: new Date().toUTCString(),
+          createdAt: new Date().toUTCString(),
+        },
+        {
+          firstName: 'Rita',
+          lastName: 'Lee',
+          password: '$2b$10$1wOJ70S1....PcETDuHsO.LbLdCTKcEtl.OjLuTTGJu7UNNNrd0oi', //vivasabor123
+          roles: () => 'client',
+          birthDate: '1990-02-11',
+          email: 'rita@mail.com',
+          phoneNumber: '+5511933223223',
+          profileImageUrl: '',
+          isActive: true,
+          updatedAt: new Date().toUTCString(),
+          createdAt: new Date().toUTCString(),
+        },
+      ])
+      .orIgnore()
+      .execute();
+  }
+}
