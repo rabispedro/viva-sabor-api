@@ -11,6 +11,7 @@ import { ItemsModule } from './items/items.module';
 import { OrdersModule } from './orders/orders.module';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import { RolesModule } from './roles/roles.module';
+import { AddressesModule } from './addresses/addresses.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { abortOnError: false });
@@ -30,8 +31,9 @@ async function bootstrap() {
       'API monolítica Viva Sabor para a plataforma de gastronomia do desafio Grão Direto',
     )
     .setVersion('1.0.0')
-    .addTag('app')
+    .addTag('addresses')
     .addTag('auth')
+    .addTag('app')
     .addTag('ingredients')
     .addTag('items')
     .addTag('orders')
@@ -43,6 +45,7 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, documentConfig, {
     include: [
+      AddressesModule,
       AuthModule,
       IngredientsModule,
       ItemsModule,

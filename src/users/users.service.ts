@@ -129,7 +129,7 @@ export class UsersService {
     return id;
   }
 
-  async remove(id: UUID): Promise<UUID> {
+  async softDelete(id: UUID): Promise<UUID> {
     const result: number | null | undefined = (
       await this.usersRepository.softDelete({
         id: id,

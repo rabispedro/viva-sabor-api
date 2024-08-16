@@ -28,7 +28,4 @@ export class ResponseUserDto {
 
   @ApiProperty()
   profileImageUrl?: string;
-
-  @ApiProperty()
-  isActive: boolean;
 }

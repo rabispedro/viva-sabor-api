@@ -1,3 +1,4 @@
+import { Address } from 'src/addresses/entities/address.entity';
 import { Role } from 'src/roles/entities/role.entity';
 import { Auditable } from 'src/shared/entities/auditable.entity';
 import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
@@ -13,9 +14,15 @@ export class User extends Auditable {
   @Column({ name: 'password', nullable: false })
   password: string;
 
-  @ManyToMany(() => Role)
+  @ManyToMany(() => Role, { cascade: true })
   @JoinTable()
   roles: Role[];
+
+  @ManyToMany(() => Address, (address: Address) => address.users, {
+    cascade: true,
+  })
+  @JoinTable()
+  addresses: Address[];
 
   @Column({ name: 'birth_date', nullable: false })
   birthDate: Date;

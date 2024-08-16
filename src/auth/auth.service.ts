@@ -30,6 +30,7 @@ export class AuthService {
 
     const token: string = await this.jwtService.signAsync({
       sub: user.id,
+      name: `${user.firstName} ${user.lastName}`,
       email: user.email,
       profileImage: user.profileImageUrl ?? '',
       roles: user.roles,

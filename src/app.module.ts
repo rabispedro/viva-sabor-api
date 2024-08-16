@@ -21,6 +21,7 @@ import { DataSource } from 'typeorm';
 import { Role } from './roles/entities/role.entity';
 import { User } from './users/entities/user.entity';
 import { hashSync } from 'bcrypt';
+import { AddressesModule } from './addresses/addresses.module';
 
 @Module({
   imports: [
@@ -107,6 +108,7 @@ import { hashSync } from 'bcrypt';
         expiresIn: process.env.JWT_EXPIRES_IN,
       },
     }),
+    AddressesModule,
     AuthModule,
     IngredientsModule,
     ItemsModule,

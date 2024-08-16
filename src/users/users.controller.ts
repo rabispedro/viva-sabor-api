@@ -47,6 +47,7 @@ export class UsersController {
 
   @Post()
   @PublicRoute()
+  @ApiBody({ type: CreateUserDto })
   @ApiResponse({ type: ResponseUserDto })
   async create(
     @Body(ValidationPipe) createUserDto: CreateUserDto,
@@ -74,6 +75,7 @@ export class UsersController {
   @Put(':id')
   @Roles(['admin', 'manager', 'employee', 'client'])
   @ApiParam({ name: 'id' })
+  @ApiBody({ type: UpdateUserDto })
   @ApiResponse({ type: String })
   async update(
     @Param('id', ParseUUIDPipe) id: UUID,
@@ -98,8 +100,8 @@ export class UsersController {
   @Roles(['admin', 'manager'])
   @ApiParam({ name: 'id' })
   @ApiResponse({ type: String })
-  async remove(@Param('id', ParseUUIDPipe) id: UUID): Promise<UUID> {
-    return await this.usersService.remove(id);
+  async softDelete(@Param('id', ParseUUIDPipe) id: UUID): Promise<UUID> {
+    return await this.usersService.softDelete(id);
   }
 
   @Patch(':id/restore')

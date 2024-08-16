@@ -1,12 +1,13 @@
 import { UUID } from 'crypto';
+import { Address } from 'src/addresses/entities/address.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
   ManyToMany,
-  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -16,8 +17,8 @@ export class Restaurant {
   @PrimaryColumn('uuid')
   id: UUID;
 
-  // @Column()
-  // razaoSocial: string;
+  @Column()
+  razaoSocial: string;
 
   @Column()
   nomeFantasia: string;
@@ -37,6 +38,10 @@ export class Restaurant {
 
   // @OneToMany(() => Item, (item) => item.restaurant)
   // items: Item[];
+
+  @ManyToMany(() => Address)
+  @JoinTable()
+  addresses: Address[];
 
   @Column()
   minimumFee: number;
