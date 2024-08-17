@@ -1,6 +1,6 @@
+import { UsersService } from './../users/users.service';
 import {
   BadRequestException,
-  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -12,30 +12,57 @@ import { ListResponseDto } from 'src/shared/dtos/list-response.dto';
 import { UUID } from 'crypto';
 import { ResponseAddressDto } from './dto/response-address.dto';
 import { AddressesMapper } from './mappers/address.mapper';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ResponseUserDto } from 'src/users/dto/response-user.dto';
+import { UsersMapper } from 'src/users/mappers/users.mapper';
+import { RestaurantsService } from 'src/restaurants/restaurants.service';
+import { RestaurantsMapper } from 'src/restaurants/mappers/restaurants.mapper';
+import { ResponseRestaurantDto } from 'src/restaurants/dto/response-restaurant.dto';
 
 @Injectable()
 export class AddressesService {
   constructor(
-    @Inject()
+    private readonly usersService: UsersService,
+    private readonly restaurantsService: RestaurantsService,
+
+    @InjectRepository(Address)
     private readonly addressesRepository: Repository<Address>,
   ) {}
 
-  async create(
+  async createtoUser(
+    userId: UUID,
     createAddressDto: CreateAddressDto,
   ): Promise<ResponseAddressDto> {
+    const user: ResponseUserDto = await this.usersService.findOneById(userId);
     const address: Address = this.addressesRepository.create(createAddressDto);
+
+    address.users.push(UsersMapper.mapToEntity(user));
     await this.addressesRepository.save(address);
 
-    return AddressesMapper.map(address);
+    return AddressesMapper.mapToDto(address);
+  }
+
+  async createToRestaurant(
+    restaurantId: UUID,
+    createAddressDto: CreateAddressDto,
+  ): Promise<ResponseAddressDto> {
+    const restaurant: ResponseRestaurantDto =
+      await this.restaurantsService.findOneById(restaurantId);
+    const address: Address = this.addressesRepository.create(createAddressDto);
+
+    address.restaurants.push(RestaurantsMapper.mapToEntity(restaurant));
+    await this.addressesRepository.save(address);
+
+    return AddressesMapper.mapToDto(address);
   }
 
   async findAllByUserId(
-    id: UUID,
+    userId: UUID,
   ): Promise<ListResponseDto<ResponseAddressDto>> {
     const addresses: Address[] = await this.addressesRepository.find({
       where: {
         users: {
-          id: id,
+          id: userId,
         },
       },
       relations: {
@@ -48,19 +75,19 @@ export class AddressesService {
       throw new NotFoundException('Addresses could not be found');
 
     const response: ResponseAddressDto[] = addresses.map((address: Address) =>
-      AddressesMapper.map(address),
+      AddressesMapper.mapToDto(address),
     );
 
     return new ListResponseDto<ResponseAddressDto>([...response], 100, 0, 10);
   }
 
   async findAllByRestaurantId(
-    id: UUID,
+    restaurantId: UUID,
   ): Promise<ListResponseDto<ResponseAddressDto>> {
     const addresses: Address[] = await this.addressesRepository.find({
       where: {
         restaurants: {
-          id: id,
+          id: restaurantId,
         },
       },
       relations: {
@@ -73,7 +100,7 @@ export class AddressesService {
       throw new NotFoundException('Addresses could not be found');
 
     const response: ResponseAddressDto[] = addresses.map((address: Address) =>
-      AddressesMapper.map(address),
+      AddressesMapper.mapToDto(address),
     );
 
     return new ListResponseDto<ResponseAddressDto>([...response], 100, 0, 10);

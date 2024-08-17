@@ -30,31 +30,47 @@ import { ResponseAddressDto } from './dto/response-address.dto';
 export class AddressesController {
   constructor(private readonly addressesService: AddressesService) {}
 
-  @Post()
+  @Post('user/:userId')
+  @ApiParam({ name: 'userId' })
   @ApiBody({ type: CreateAddressDto })
   @ApiResponse({ type: ResponseAddressDto })
-  async create(
+  async createToUser(
+    @Param('userId', ParseUUIDPipe) userId: UUID,
     @Body(ValidationPipe) createAddressDto: CreateAddressDto,
   ): Promise<ResponseAddressDto> {
-    return await this.addressesService.create(createAddressDto);
+    return await this.addressesService.createtoUser(userId, createAddressDto);
   }
 
-  @Get(':id/user')
-  @ApiParam({ name: 'id' })
+  @Post('restaurant/:restaurantId')
+  @ApiParam({ name: 'restaurantId' })
+  @ApiBody({ type: CreateAddressDto })
+  @ApiResponse({ type: ResponseAddressDto })
+  async createToRestaurant(
+    @Param('restaurantId', ParseUUIDPipe) restaurantId: UUID,
+    @Body(ValidationPipe) createAddressDto: CreateAddressDto,
+  ): Promise<ResponseAddressDto> {
+    return await this.addressesService.createToRestaurant(
+      restaurantId,
+      createAddressDto,
+    );
+  }
+
+  @Get('user/:userId')
+  @ApiParam({ name: 'userId' })
   @ApiResponse({ type: ListResponseDto<ResponseAddressDto> })
   async findAllByUserId(
-    @Param('id', ParseUUIDPipe) id: UUID,
+    @Param('userId', ParseUUIDPipe) userId: UUID,
   ): Promise<ListResponseDto<ResponseAddressDto>> {
-    return await this.addressesService.findAllByUserId(id);
+    return await this.addressesService.findAllByUserId(userId);
   }
 
-  @Get(':id/restaurant')
-  @ApiParam({ name: 'id' })
+  @Get('restaurant/:restaurantId')
+  @ApiParam({ name: 'restaurantId' })
   @ApiResponse({ type: ListResponseDto<ResponseAddressDto> })
   async findAllByRestaurantId(
-    @Param('id', ParseUUIDPipe) id: UUID,
+    @Param('restaurantId', ParseUUIDPipe) restaurantId: UUID,
   ): Promise<ListResponseDto<ResponseAddressDto>> {
-    return await this.addressesService.findAllByRestaurantId(id);
+    return await this.addressesService.findAllByRestaurantId(restaurantId);
   }
 
   @Put(':id')

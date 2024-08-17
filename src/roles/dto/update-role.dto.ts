@@ -1,18 +1,15 @@
-import { PartialType } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { CreateRoleDto } from './create-role.dto';
-import { IsString, IsNotEmpty, IsUUID } from 'class-validator';
-import { UUID } from 'crypto';
+import { IsString, IsNotEmpty, IsEmpty } from 'class-validator';
 
 export class UpdateRoleDto extends PartialType(CreateRoleDto) {
-  @IsUUID()
-  @IsNotEmpty()
-  id: UUID;
-
+  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   name: string;
 
+  @ApiProperty()
   @IsString()
-  @IsNotEmpty()
-  description: string;
+  @IsEmpty()
+  description?: string;
 }

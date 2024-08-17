@@ -1,5 +1,6 @@
 import { UUID } from 'crypto';
 import {
+  Column,
   CreateDateColumn,
   DeleteDateColumn,
   PrimaryGeneratedColumn,
@@ -18,4 +19,7 @@ export abstract class Auditable {
 
   @DeleteDateColumn({ name: 'deleted_at', select: false })
   deletedAt: Date;
+
+  @Column({ name: 'is_active', nullable: false, default: true, select: false })
+  isActive: boolean;
 }

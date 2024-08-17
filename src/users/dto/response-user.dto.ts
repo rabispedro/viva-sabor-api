@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UUID } from 'crypto';
+import { ResponseAddressDto } from 'src/addresses/dto/response-address.dto';
 
 export class ResponseUserDto {
   @ApiProperty()
@@ -28,4 +29,7 @@ export class ResponseUserDto {
 
   @ApiProperty()
   profileImageUrl?: string;
+
+  @ApiProperty()
+  addresses: ResponseAddressDto[];
 }

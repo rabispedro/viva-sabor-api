@@ -66,10 +66,10 @@ export class UsersController {
   @Roles(['admin', 'manager'])
   @ApiParam({ name: 'id' })
   @ApiResponse({ type: ResponseUserDto })
-  async findById(
+  async findOneById(
     @Param('id', ParseUUIDPipe) id: UUID,
   ): Promise<ResponseUserDto> {
-    return await this.usersService.findById(id, true);
+    return await this.usersService.findOneById(id, true);
   }
 
   @Put(':id')

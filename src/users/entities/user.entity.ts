@@ -1,7 +1,16 @@
 import { Address } from 'src/addresses/entities/address.entity';
+import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { Role } from 'src/roles/entities/role.entity';
 import { Auditable } from 'src/shared/entities/auditable.entity';
-import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  Relation,
+} from 'typeorm';
 
 @Entity('User')
 export class User extends Auditable {
@@ -13,16 +22,6 @@ export class User extends Auditable {
 
   @Column({ name: 'password', nullable: false })
   password: string;
-
-  @ManyToMany(() => Role, { cascade: true })
-  @JoinTable()
-  roles: Role[];
-
-  @ManyToMany(() => Address, (address: Address) => address.users, {
-    cascade: true,
-  })
-  @JoinTable()
-  addresses: Address[];
 
   @Column({ name: 'birth_date', nullable: false })
   birthDate: Date;
@@ -36,6 +35,39 @@ export class User extends Auditable {
   @Column({ name: 'profile_image_url', nullable: true })
   profileImageUrl?: string;
 
-  @Column({ name: 'is_active', nullable: false, default: true, select: false })
-  isActive: boolean;
+  @ManyToMany(() => Role, { cascade: true })
+  @JoinTable({
+    name: 'User_Role',
+    joinColumn: {
+      name: 'user_id',
+    },
+    inverseJoinColumn: {
+      name: 'role_id',
+    },
+  })
+  roles: Relation<Role>[];
+
+  @ManyToMany(() => Address, (address: Address) => address.users, {
+    cascade: true,
+  })
+  @JoinTable({
+    name: 'User_Address',
+    joinColumn: {
+      name: 'user_id',
+    },
+    inverseJoinColumn: {
+      name: 'address_id',
+    },
+  })
+  addresses: Relation<Address>[];
+
+  @ManyToOne(
+    () => Restaurant,
+    (restaurant: Restaurant) => restaurant.employees,
+    { nullable: true },
+  )
+  @JoinColumn({
+    name: 'restaurant_id',
+  })
+  restaurant: Relation<Restaurant>;
 }

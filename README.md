@@ -1,47 +1,79 @@
 # viva-sabor-api
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
+  <a href="https://github.com/rabispedro/" target="blank"><img src="https://avatars.githubusercontent.com/u/42853022?s=400&u=2d70e35dd2908adbb6f84cdb13350155169be00f&v=4" width="200" alt="Viva Sabor logo" /></a>
 </p>
 
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-> [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Descrição
 
 API monolítica Viva Sabor para a plataforma de gastronomia do desafio Grão Direto.
 
 ## Requisitos
 
-- Autenticação por email e senha
-- API REST
-- Repositório de dados com `usuários`, `restaurantes` e `itens do cardápio`
+- Autenticação por email e senha;
+- API REST;
+- Repositório de dados com `usuários`, `restaurantes` e `itens do cardápio`;
 
-## Installation
+## Recursos Disponíveis:
+
+Esta API disponibiliza vários recursos, listados a seguir, além da previsão de inclusão de melhorias e sistemas novos.
+
+- App
+  - Checagem simples de saúde da aplicação;
+- Endereço
+  - Cadastro de endereço vinculado ao usuário cliente;
+  - Cadastro de endereço vinculado ao restaurante;
+  - Cadastro de endereço vinculado ao restaurante;
+- Cargo
+  - Cadastro de endereço vinculado ao usuário cliente;
+  - Cadastro de endereço vinculado ao restaurante;
+- Autenticação
+  - Login com email e senha;
+  - JWT com informações de sessão;
+- Pedido
+  - Cadastro de pedido de um cliente em um restaurante;
+  - Visualização de pedidos de um cliente;
+  - Visualização de pedidos de um restaurante;
+- Usuário
+  - Cadastro de cliente novo;
+  - Cadastro de cliente novo;
+- Restaurante
+  - aaa
+
+## Instalação
+
+Para instalar os pacotes necessários deste projeto, é importante ter algum gerenciador de pacotes NodeJS.
+
+### NPM
+
+Caso esteja usando o NPM, rode os comandos abaixo:
 
 ```bash
-$ yarn install
+$ npm install
 ```
 
-## Running the app
+### Yarn
+
+Caso deseje usar o Yarn, certifique-se que o mesmo esteja instalado em sua máquina ou utilize o NPX para executá-lo.
+
+```bash
+# Instalar Yarn localmente
+$ sudo npm i -g yarn
+$ yarn install
+
+# Executando via NPX
+$ npx yarn install
+```
+
+## Iniciando o servidor
+
+Para inicializar corretamente a aplicação, é necessário subir os serviços do `docker-compose.yaml` antes.
+
+Além disso, também é preciso configurar o arquivo `.env` de acordo com o `.env.template`.
+
+Segue abaixo os comandos para inicializar o servidor:
 
 ```bash
 # development
@@ -54,7 +86,7 @@ $ yarn run start:dev
 $ yarn run start:prod
 ```
 
-## Test
+## Testes
 
 ```bash
 # unit tests

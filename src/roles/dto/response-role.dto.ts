@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UUID } from 'crypto';
 
-export class RoleResponseDto {
+export class ResponseRoleDto {
   @ApiProperty()
   id: UUID;
 

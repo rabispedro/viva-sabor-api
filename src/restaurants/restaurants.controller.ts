@@ -1,30 +1,36 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UseInterceptors,
-  UseGuards,
-  ParseUUIDPipe,
-  Put,
+  Get,
+  Param,
   ParseBoolPipe,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Put,
+  UseGuards,
+  ValidationPipe,
 } from '@nestjs/common';
 import { RestaurantsService } from './restaurants.service';
-import { CreateRestaurantDto } from './dto/create-restaurant.dto';
-import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+// import { CacheInterceptor } from '@nestjs/cache-manager';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
-import { ApiBearerAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Roles } from 'src/shared/decorators/roles.decorator';
-import { ValidationPipe } from 'src/shared/pipes/validation.pipe';
+import { CreateRestaurantDto } from './dto/create-restaurant.dto';
+import { ResponseRestaurantDto } from './dto/response-restaurant.dto';
+import { ListResponseDto } from 'src/shared/dtos/list-response.dto';
 import { UUID } from 'crypto';
-import { RestaurantResponseDto } from './dto/restaurant-response.dto';
+import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
 
 @Controller('restaurants')
-@UseInterceptors(CacheInterceptor)
+// @UseInterceptors(CacheInterceptor)
 @UseGuards(RolesGuard)
 @ApiTags('restaurants')
 @ApiBearerAuth()
@@ -32,55 +38,74 @@ export class RestaurantsController {
   constructor(private readonly restaurantsService: RestaurantsService) {}
 
   @Post()
-  @Roles(['admin', 'manager'])
-  @ApiResponse({ type: RestaurantResponseDto })
+  @Roles(['admin'])
+  @ApiBody({ type: CreateRestaurantDto })
+  @ApiResponse({ type: ResponseRestaurantDto })
   async create(
     @Body(ValidationPipe) createRestaurantDto: CreateRestaurantDto,
-  ): Promise<RestaurantResponseDto> {
+  ): Promise<ResponseRestaurantDto> {
     return await this.restaurantsService.create(createRestaurantDto);
   }
 
-  // @Get()
-  // // @ApiResponse()
-  // async findAll(): Promise<RestaurantResponseDto[]> {
-  //   return await this.restaurantsService.findAll();
-  // }
+  @Get()
+  @ApiResponse({ type: ListResponseDto<ResponseRestaurantDto> })
+  async findAll(): Promise<ListResponseDto<ResponseRestaurantDto>> {
+    return await this.restaurantsService.findAll();
+  }
 
-  // @Get(':id')
-  // @ApiParam({ name: 'id' })
-  // // @ApiResponse({ type: RestaurantResponseDto })
-  // async findById(
-  //   @Param('id', ParseUUIDPipe) id: UUID,
-  // ): Promise<RestaurantResponseDto> {
-  //   return await this.restaurantsService.findById(id);
-  // }
+  @Get(':id')
+  @ApiParam({ name: 'id' })
+  @ApiResponse({ type: ResponseRestaurantDto })
+  async findOneById(
+    @Param('id', ParseUUIDPipe) id: UUID,
+  ): Promise<ResponseRestaurantDto> {
+    return await this.restaurantsService.findOneById(id);
+  }
 
-  // @Put(':id')
-  // @ApiParam({ name: 'id' })
-  // async update(
-  //   @Param('id', ParseUUIDPipe) id: UUID,
-  //   @Body(ValidationPipe) updateRestaurantDto: UpdateRestaurantDto,
-  // ): Promise<UUID> {
-  //   return await this.restaurantsService.update(id, updateRestaurantDto);
-  // }
+  @Get('name/:name')
+  @ApiParam({ name: 'name' })
+  @ApiResponse({ type: ListResponseDto<ResponseRestaurantDto> })
+  async findAllByName(
+    @Param('name', ParseUUIDPipe) id: UUID,
+  ): Promise<ListResponseDto<ResponseRestaurantDto>> {
+    return await this.restaurantsService.findAllByName(id);
+  }
 
-  // @Patch(':id/active/:flag')
-  // // @Roles(['admin', 'manager'])
-  // @ApiParam({ name: 'id' })
-  // @ApiParam({ name: 'flag' })
-  // // @ApiResponse()
-  // async changeActive(
-  //   @Param('id', ParseUUIDPipe) id: UUID,
-  //   @Param('flag', ParseBoolPipe) flag: boolean,
-  // ): Promise<RestaurantResponseDto> {
-  //   return await this.restaurantsService.changeActive(id, flag);
-  // }
+  @Put(':id')
+  @Roles(['admin', 'manager'])
+  @ApiParam({ name: 'id' })
+  async update(
+    @Param('id', ParseUUIDPipe) id: UUID,
+    @Body(ValidationPipe) updateRestaurantDto: UpdateRestaurantDto,
+  ): Promise<UUID> {
+    return await this.restaurantsService.update(id, updateRestaurantDto);
+  }
 
-  // @Delete(':id')
-  // // @Roles(['admin', 'manager'])
-  // @ApiParam({ name: 'id' })
-  // // @ApiResponse()
-  // async remove(@Param('id', ParseUUIDPipe) id: UUID): Promise<UUID> {
-  //   return await this.restaurantsService.remove(id);
-  // }
+  @Patch(':id/active/:flag')
+  @Roles(['admin', 'manager'])
+  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'flag' })
+  @ApiResponse({ type: ResponseRestaurantDto })
+  async changeActive(
+    @Param('id', ParseUUIDPipe) id: UUID,
+    @Param('flag', ParseBoolPipe) flag: boolean,
+  ): Promise<ResponseRestaurantDto> {
+    return await this.restaurantsService.changeActive(id, flag);
+  }
+
+  @Delete(':id')
+  @Roles(['admin', 'manager'])
+  @ApiParam({ name: 'id' })
+  @ApiResponse({ type: String })
+  async softDelete(@Param('id', ParseUUIDPipe) id: UUID): Promise<UUID> {
+    return await this.restaurantsService.softDelete(id);
+  }
+
+  @Patch(':id/restore')
+  @Roles(['admin', 'manager'])
+  @ApiParam({ name: 'id' })
+  @ApiResponse({ type: String })
+  async restore(@Param('id', ParseUUIDPipe) id: UUID): Promise<UUID> {
+    return await this.restaurantsService.restore(id);
+  }
 }

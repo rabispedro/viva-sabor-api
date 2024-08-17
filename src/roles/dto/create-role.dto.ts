@@ -10,5 +10,5 @@ export class CreateRoleDto {
   @ApiProperty()
   @IsString()
   @IsEmpty()
-  description: string;
+  description?: string;
 }

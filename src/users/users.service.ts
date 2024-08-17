@@ -45,7 +45,7 @@ export class UsersService {
     await this.usersRepository.save(user);
 
     user.password = '';
-    return UsersMapper.map(user);
+    return UsersMapper.mapToDto(user);
   }
 
   async findAll(): Promise<ListResponseDto<ResponseUserDto>> {
@@ -63,18 +63,23 @@ export class UsersService {
     users.forEach((user: User) => (user.password = ''));
 
     const response: ResponseUserDto[] = users.map((user: User) =>
-      UsersMapper.map(user),
+      UsersMapper.mapToDto(user),
     );
 
     return new ListResponseDto<ResponseUserDto>([...response], 100, 0, 10);
   }
 
-  async findById(id: UUID, ommitPassword?: boolean): Promise<ResponseUserDto> {
+  async findOneById(
+    id: UUID,
+    ommitPassword?: boolean,
+  ): Promise<ResponseUserDto> {
     const user: User | null = await this.usersRepository.findOne({
       where: {
         id: id,
       },
       relations: {
+        addresses: true,
+        restaurant: true,
         roles: true,
       },
       cache: true,
@@ -85,10 +90,10 @@ export class UsersService {
 
     if (ommitPassword === true) user.password = '';
 
-    return UsersMapper.map(user);
+    return UsersMapper.mapToDto(user);
   }
 
-  async findByEmail(
+  async findOneByEmail(
     email: string,
     ommitPassword?: boolean,
   ): Promise<ResponseUserDto> {
@@ -97,6 +102,8 @@ export class UsersService {
         email: email,
       },
       relations: {
+        addresses: true,
+        restaurant: true,
         roles: true,
       },
       cache: true,
@@ -107,7 +114,7 @@ export class UsersService {
 
     if (ommitPassword === true) user.password = '';
 
-    return UsersMapper.map(user);
+    return UsersMapper.mapToDto(user);
   }
 
   async changeActive(id: UUID, flag: boolean): Promise<ResponseUserDto> {
@@ -118,7 +125,7 @@ export class UsersService {
 
     user = await this.usersRepository.save({ ...user, isActive: flag });
 
-    return UsersMapper.map(user);
+    return UsersMapper.mapToDto(user);
   }
 
   async update(id: UUID, updateUserDto: UpdateUserDto): Promise<UUID> {
@@ -180,7 +187,7 @@ export class UsersService {
     });
     user.password = '';
 
-    return UsersMapper.map(user);
+    return UsersMapper.mapToDto(user);
   }
 
   async changePassword(

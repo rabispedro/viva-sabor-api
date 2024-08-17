@@ -6,23 +6,24 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { IngredientsModule } from './ingredients/ingredients.module';
-import { ItemsModule } from './items/items.module';
 import { OrdersModule } from './orders/orders.module';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import { RolesModule } from './roles/roles.module';
 import { AddressesModule } from './addresses/addresses.module';
+import { AppController } from './app.controller';
+import helmet from 'helmet';
+import { DishesModule } from './dishes/dishes.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { abortOnError: false });
+  const app = await NestFactory.create(AppModule, {
+    abortOnError: false,
+    cors: true,
+  });
+
+  app.use(helmet());
 
   const configService: ConfigService = app.get(ConfigService);
   const port: number = configService.get('API_PORT') ?? 3000;
-
-  //  Api Versioning Config
-  // app.enableVersioning({
-  //   type: VersioningType.URI,
-  // });
 
   //  Swagger Documentation
   const documentConfig = new DocumentBuilder()
@@ -32,10 +33,9 @@ async function bootstrap() {
     )
     .setVersion('1.0.0')
     .addTag('addresses')
-    .addTag('auth')
     .addTag('app')
-    .addTag('ingredients')
-    .addTag('items')
+    .addTag('auth')
+    .addTag('dishes')
     .addTag('orders')
     .addTag('restaurants')
     .addTag('roles')
@@ -45,10 +45,10 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, documentConfig, {
     include: [
+      AppController,
       AddressesModule,
       AuthModule,
-      IngredientsModule,
-      ItemsModule,
+      DishesModule,
       OrdersModule,
       RestaurantsModule,
       RolesModule,

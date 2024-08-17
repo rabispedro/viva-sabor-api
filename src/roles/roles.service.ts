@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
-import { UpdateRoleDto } from './dto/update-role.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from './entities/role.entity';
-import { Repository } from 'typeorm';
-import { RoleResponseDto } from './dto/role-response.dto';
+import { ILike, Repository } from 'typeorm';
+import { ResponseRoleDto } from './dto/response-role.dto';
+import { ListResponseDto } from 'src/shared/dtos/list-response.dto';
+import { RolesMapper } from './mappers/roles.mapper';
 
 @Injectable()
 export class RolesService {
@@ -13,26 +14,43 @@ export class RolesService {
     private readonly rolesRepository: Repository<Role>,
   ) {}
 
-  async create(createRoleDto: CreateRoleDto): Promise<RoleResponseDto> {
-    const result = this.rolesRepository.create(createRoleDto);
-    await this.rolesRepository.save(result);
+  async create(createRoleDto: CreateRoleDto): Promise<ResponseRoleDto> {
+    const role: Role = this.rolesRepository.create(createRoleDto);
+    await this.rolesRepository.save(role);
 
-    return { ...result };
+    return RolesMapper.map(role);
   }
 
-  findAll() {
-    return `This action returns all roles`;
+  async findAll(): Promise<ListResponseDto<ResponseRoleDto>> {
+    const roles: Role[] = await this.rolesRepository.find({
+      cache: true,
+    });
+
+    if (!roles || roles.length === 0)
+      throw new NotFoundException('Roles could not be found');
+
+    const response: ResponseRoleDto[] = roles.map((role: Role) =>
+      RolesMapper.map(role),
+    );
+
+    return new ListResponseDto<ResponseRoleDto>([...response], 100, 0, 10);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} role`;
-  }
+  async findAllByName(name: string): Promise<ListResponseDto<ResponseRoleDto>> {
+    const roles: Role[] = await this.rolesRepository.find({
+      where: {
+        name: ILike(name),
+      },
+      cache: true,
+    });
 
-  update(id: number, updateRoleDto: UpdateRoleDto) {
-    return `This action updates a #${id} role`;
-  }
+    if (!roles || roles.length === 0)
+      throw new NotFoundException('Roles could not be found');
 
-  remove(id: number) {
-    return `This action removes a #${id} role`;
+    const response: ResponseRoleDto[] = roles.map((role: Role) =>
+      RolesMapper.map(role),
+    );
+
+    return new ListResponseDto<ResponseRoleDto>([...response], 100, 0, 10);
   }
 }

@@ -14,7 +14,7 @@ export class AuthService {
   ) {}
 
   async signIn(authLoginDto: AuthLoginDto): Promise<AuthTokenResponseDto> {
-    const user: ResponseUserDto = await this.usersService.findByEmail(
+    const user: ResponseUserDto = await this.usersService.findOneByEmail(
       authLoginDto.email,
     );
 

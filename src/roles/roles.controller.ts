@@ -4,13 +4,22 @@ import {
   Body,
   ValidationPipe,
   UseGuards,
+  Get,
+  Param,
 } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { Roles } from 'src/shared/decorators/roles.decorator';
-import { RoleResponseDto } from './dto/role-response.dto';
-import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ResponseRoleDto } from './dto/response-role.dto';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
+import { ListResponseDto } from 'src/shared/dtos/list-response.dto';
 
 @Controller('roles')
 @UseGuards(RolesGuard)
@@ -21,33 +30,28 @@ export class RolesController {
 
   @Post()
   @Roles(['admin'])
-  @ApiResponse({ type: RoleResponseDto })
+  @ApiBody({ type: CreateRoleDto })
+  @ApiResponse({ type: ResponseRoleDto })
   async create(
     @Body(ValidationPipe) createRoleDto: CreateRoleDto,
-  ): Promise<RoleResponseDto> {
+  ): Promise<ResponseRoleDto> {
     return await this.rolesService.create(createRoleDto);
   }
 
-  // @Get()
-  // @Roles(['admin'])
-  // @ApiResponse({type: ListResponseDto<RoleResponseDto>})
-  // async findAll(): Promise<RoleResponseDto[]> {
-  //   return await this.rolesService.findAll();
-  // }
-  // @Get(':id')
-  // @ApiParam({ name: 'id' })
-  // @ApiResponse({ type: RoleResponseDto })
-  // async findOne(@Param('id', ParseUUIDPipe) id: UUID): Promise<RoleResponseDto> {
-  //   return await this.rolesService.findOne(id);
-  // }
-  // @Put(':id')
-  // @ApiParam({ name: 'id' })
-  // @ApiResponse({ type: RoleResponseDto })
-  // update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
-  //   return this.rolesService.update(+id, updateRoleDto);
-  // }
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.rolesService.remove(+id);
-  // }
+  @Get()
+  @Roles(['admin', 'manager'])
+  @ApiResponse({ type: ListResponseDto<ResponseRoleDto> })
+  async findAll(): Promise<ListResponseDto<ResponseRoleDto>> {
+    return await this.rolesService.findAll();
+  }
+
+  @Get('name/:name')
+  @Roles(['admin', 'manager'])
+  @ApiParam({ name: 'name' })
+  @ApiResponse({ type: ListResponseDto<ResponseRoleDto> })
+  async findAllByName(
+    @Param('name') name: string,
+  ): Promise<ListResponseDto<ResponseRoleDto>> {
+    return await this.rolesService.findAllByName(name);
+  }
 }

@@ -1,6 +1,4 @@
-import { Ingredient } from 'src/ingredients/entities/ingredient.entity';
-import { Item } from 'src/items/entities/item.entity';
-import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
+// import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
@@ -12,14 +10,8 @@ export class Order {
   @Prop(User)
   buyer: User;
 
-  @Prop(Restaurant)
-  restaurant: Restaurant;
-
-  @Prop([Item])
-  items: Item[];
-
-  @Prop([Ingredient])
-  aditionals?: Ingredient[];
+  // @Prop(Restaurant)
+  // restaurant: Restaurant;
 
   @Prop(Number)
   fee?: number;

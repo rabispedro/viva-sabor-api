@@ -12,8 +12,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './shared/guards/auth.guard';
 import { RestaurantsModule } from './restaurants/restaurants.module';
-import { IngredientsModule } from './ingredients/ingredients.module';
-import { ItemsModule } from './items/items.module';
 import { OrdersModule } from './orders/orders.module';
 import { RolesModule } from './roles/roles.module';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -22,6 +20,8 @@ import { Role } from './roles/entities/role.entity';
 import { User } from './users/entities/user.entity';
 import { hashSync } from 'bcrypt';
 import { AddressesModule } from './addresses/addresses.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { DishesModule } from './dishes/dishes.module';
 
 @Module({
   imports: [
@@ -70,6 +70,12 @@ import { AddressesModule } from './addresses/addresses.module';
         abortEarly: false,
       },
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 2000,
+        limit: 10,
+      },
+    ]),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.SQL_HOST,
@@ -110,10 +116,9 @@ import { AddressesModule } from './addresses/addresses.module';
     }),
     AddressesModule,
     AuthModule,
-    IngredientsModule,
-    ItemsModule,
-    OrdersModule,
+    DishesModule,
     RestaurantsModule,
+    OrdersModule,
     RolesModule,
     UsersModule,
   ],
@@ -128,8 +133,17 @@ import { AddressesModule } from './addresses/addresses.module';
 })
 export class AppModule {
   constructor(private readonly dataSource: DataSource) {
-    const plainPassword = 'vivasabor123';
-    const hashPassword = hashSync(plainPassword, process.env.ENCRYPT_SALT!);
+    const plainPassword: string = 'vivasabor123';
+    const hashPassword: string = hashSync(
+      plainPassword,
+      process.env.ENCRYPT_SALT!,
+    );
+
+    const plainGraoDiretoPassword: string = '123Fred';
+    const hashGraoDiretoPassword: string = hashSync(
+      plainGraoDiretoPassword,
+      process.env.ENCRYPT_SALT!,
+    );
 
     this.dataSource
       .createQueryBuilder()
@@ -169,7 +183,7 @@ export class AppModule {
           id: '5119a9bf-aec7-42e1-8123-e2ad4c5449b0',
           firstName: 'Fred',
           lastName: 'Grão Direto',
-          password: hashPassword,
+          password: hashGraoDiretoPassword,
           birthDate: '2000-01-02',
           email: 'fred@graodireto.com.br',
           phoneNumber: '+5511985654515',

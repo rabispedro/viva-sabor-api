@@ -1,7 +1,7 @@
 import { UUID } from 'crypto';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn, Relation } from 'typeorm';
 
 @Entity('Address')
 export class Address {
@@ -36,12 +36,11 @@ export class Address {
   complement?: string;
 
   @ManyToMany(() => User, (user: User) => user.addresses)
-  users: User[];
+  users: Relation<User>[];
 
   @ManyToMany(
     () => Restaurant,
     (restaurant: Restaurant) => restaurant.addresses,
-    { cascade: true },
   )
-  restaurants: Restaurant[];
+  restaurants: Relation<Restaurant>[];
 }

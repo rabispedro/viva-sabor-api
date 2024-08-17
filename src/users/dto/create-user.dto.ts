@@ -44,5 +44,5 @@ export class CreateUserDto {
   @ApiProperty()
   @IsOptional()
   @IsUrl()
-  image_url?: string;
+  profileImageUrl?: string;
 }
