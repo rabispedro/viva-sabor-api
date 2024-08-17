@@ -19,6 +19,7 @@ import { ResponseUserDto } from './dto/response-user.dto';
 import { FileUtils } from 'src/shared/utils/file.utils';
 import { Client } from 'minio';
 import { MINIO_CONNECTION } from 'nestjs-minio';
+import { BucketUtils } from 'src/shared/utils/bucket.utils';
 
 @Injectable()
 export class UsersService {
@@ -27,7 +28,7 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
 
     @Inject(MINIO_CONNECTION)
-    private readonly userBucket: Client,
+    private readonly usersBucket: Client,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<ResponseUserDto> {
@@ -159,7 +160,7 @@ export class UsersService {
 
   async uploadProfileImage(
     id: UUID,
-    profileImageUrl: Express.Multer.File,
+    profileImageFile: Express.Multer.File,
   ): Promise<ResponseUserDto> {
     let user: User | null = await this.usersRepository.findOneBy({ id: id });
 
@@ -168,15 +169,15 @@ export class UsersService {
 
     const profileImageId: UUID = crypto.randomUUID();
     const profileImageType: string = FileUtils.extractFileTypeFromMime(
-      profileImageUrl.mimetype,
+      profileImageFile.mimetype,
     );
     const profileImageName: string = `${profileImageId}.${profileImageType}`;
 
-    await this.setupUsersBucket();
-    await this.userBucket.putObject(
+    await BucketUtils.setupBucket(this.usersBucket, 'users');
+    await this.usersBucket.putObject(
       'users',
       profileImageName,
-      profileImageUrl.buffer,
+      profileImageFile.buffer,
     );
 
     const profileImagePath: string = `${process.env.BUCKET_HOST!}:${process.env.BUCKET_PORT!}/users/${profileImageName}`;
@@ -219,29 +220,5 @@ export class UsersService {
     await this.usersRepository.save(user);
 
     return true;
-  }
-
-  private async setupUsersBucket(): Promise<void> {
-    const userBucketExists = await this.userBucket.bucketExists('users');
-    if (!userBucketExists) {
-      await this.userBucket.makeBucket('users');
-
-      const publicReadPolicy = {
-        Version: '2012-10-17',
-        Statement: [
-          {
-            Effect: 'Allow',
-            Principal: '*',
-            Action: ['s3:GetBucketLocation', 's3:GetObject'],
-            Resource: ['arn:aws:s3:::*'],
-          },
-        ],
-      };
-
-      await this.userBucket.setBucketPolicy(
-        'users',
-        JSON.stringify(publicReadPolicy),
-      );
-    }
   }
 }

@@ -9,6 +9,11 @@ import {
   UseGuards,
   ParseUUIDPipe,
   Put,
+  UploadedFile,
+  UseInterceptors,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
 import { DishesService } from './dishes.service';
 import { CreateDishDto } from './dto/create-dish.dto';
@@ -16,6 +21,7 @@ import { UpdateDishDto } from './dto/update-dish.dto';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiParam,
   ApiResponse,
   ApiTags,
@@ -26,6 +32,7 @@ import { ValidationPipe } from 'src/shared/pipes/validation.pipe';
 import { ListResponseDto } from 'src/shared/dtos/list-response.dto';
 import { UUID } from 'crypto';
 import { ResponseDishDto } from './dto/response-dish.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('dishes')
 @UseGuards(RolesGuard)
@@ -90,5 +97,36 @@ export class DishesController {
   @ApiResponse({ type: String })
   async restore(@Param('id', ParseUUIDPipe) id: UUID): Promise<UUID> {
     return await this.dishesService.restore(id);
+  }
+
+  @Post(':id/upload-image')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiParam({ name: 'id' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        profileImage: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({ type: ResponseDishDto })
+  async uploadImage(
+    @Param('id', ParseUUIDPipe) id: UUID,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 10_000_000 }),
+          new FileTypeValidator({ fileType: /image\/(png|jpeg|jpg)/g }),
+        ],
+      }),
+    )
+    image: Express.Multer.File,
+  ): Promise<ResponseDishDto> {
+    return await this.dishesService.uploadImage(id, image);
   }
 }

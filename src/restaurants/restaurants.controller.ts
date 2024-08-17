@@ -2,14 +2,19 @@ import {
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
+  MaxFileSizeValidator,
   Param,
   ParseBoolPipe,
+  ParseFilePipe,
   ParseUUIDPipe,
   Patch,
   Post,
   Put,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
   ValidationPipe,
 } from '@nestjs/common';
 import { RestaurantsService } from './restaurants.service';
@@ -18,6 +23,7 @@ import { RolesGuard } from 'src/shared/guards/roles.guard';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiParam,
   ApiResponse,
   ApiTags,
@@ -28,6 +34,8 @@ import { ResponseRestaurantDto } from './dto/response-restaurant.dto';
 import { ListResponseDto } from 'src/shared/dtos/list-response.dto';
 import { UUID } from 'crypto';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ResponseUserDto } from 'src/users/dto/response-user.dto';
 
 @Controller('restaurants')
 // @UseInterceptors(CacheInterceptor)
@@ -107,5 +115,67 @@ export class RestaurantsController {
   @ApiResponse({ type: String })
   async restore(@Param('id', ParseUUIDPipe) id: UUID): Promise<UUID> {
     return await this.restaurantsService.restore(id);
+  }
+
+  @Post(':id/upload-image')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiParam({ name: 'id' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        profileImage: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({ type: ResponseUserDto })
+  async uploadImage(
+    @Param('id', ParseUUIDPipe) id: UUID,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 10_000_000 }),
+          new FileTypeValidator({ fileType: /image\/(png|jpeg|jpg)/g }),
+        ],
+      }),
+    )
+    image: Express.Multer.File,
+  ): Promise<ResponseRestaurantDto> {
+    return await this.restaurantsService.uploadImage(id, image);
+  }
+
+  @Post(':id/upload-image')
+  @UseInterceptors(FileInterceptor('bannerImage'))
+  @ApiParam({ name: 'id' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        profileImage: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({ type: ResponseUserDto })
+  async uploadBannerImage(
+    @Param('id', ParseUUIDPipe) id: UUID,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 10_000_000 }),
+          new FileTypeValidator({ fileType: /image\/(png|jpeg|jpg)/g }),
+        ],
+      }),
+    )
+    bannerImage: Express.Multer.File,
+  ): Promise<ResponseRestaurantDto> {
+    return await this.restaurantsService.uploadImage(id, bannerImage);
   }
 }

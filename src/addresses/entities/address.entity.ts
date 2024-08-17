@@ -1,7 +1,13 @@
 import { UUID } from 'crypto';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn, Relation } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+  Relation,
+} from 'typeorm';
 
 @Entity('Address')
 export class Address {

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -12,12 +13,19 @@ import { ILike, Repository } from 'typeorm';
 import { DishesMapper } from './mappers/dishes.mapper';
 import { ResponseDishDto } from './dto/response-dish.dto';
 import { ListResponseDto } from 'src/shared/dtos/list-response.dto';
+import { Client } from 'minio';
+import { MINIO_CONNECTION } from 'nestjs-minio';
+import { BucketUtils } from 'src/shared/utils/bucket.utils';
+import { FileUtils } from 'src/shared/utils/file.utils';
 
 @Injectable()
 export class DishesService {
   constructor(
     @InjectRepository(Dish)
     private readonly dishesRepository: Repository<Dish>,
+
+    @Inject(MINIO_CONNECTION)
+    private readonly dishesBucket: Client,
   ) {}
 
   async create(createDishDto: CreateDishDto): Promise<ResponseDishDto> {
@@ -108,5 +116,32 @@ export class DishesService {
       throw new BadRequestException('Dish could not be restored');
 
     return id;
+  }
+
+  async uploadImage(
+    id: UUID,
+    imageFile: Express.Multer.File,
+  ): Promise<ResponseDishDto> {
+    let dish: Dish | null = await this.dishesRepository.findOneBy({ id: id });
+
+    if (!dish) throw new NotFoundException('Dish could not update image');
+
+    const imageId: UUID = crypto.randomUUID();
+    const imageType: string = FileUtils.extractFileTypeFromMime(
+      imageFile.mimetype,
+    );
+    const imageName: string = `${imageId}.${imageType}`;
+
+    await BucketUtils.setupBucket(this.dishesBucket, 'dishes');
+    await this.dishesBucket.putObject('dishes', imageName, imageFile.buffer);
+
+    const profileImagePath: string = `${process.env.BUCKET_HOST!}:${process.env.BUCKET_PORT!}/dishes/${imageName}`;
+
+    dish = await this.dishesRepository.save({
+      ...dish,
+      imageUrl: profileImagePath,
+    });
+
+    return DishesMapper.mapToDto(dish);
   }
 }

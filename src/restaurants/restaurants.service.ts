@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -12,12 +13,19 @@ import { CreateRestaurantDto } from './dto/create-restaurant.dto';
 import { ListResponseDto } from 'src/shared/dtos/list-response.dto';
 import { UUID } from 'crypto';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
+import { MINIO_CONNECTION } from 'nestjs-minio';
+import { Client } from 'minio';
+import { FileUtils } from 'src/shared/utils/file.utils';
+import { BucketUtils } from 'src/shared/utils/bucket.utils';
 
 @Injectable()
 export class RestaurantsService {
   constructor(
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
+
+    @Inject(MINIO_CONNECTION)
+    private readonly restaurantsBucket: Client,
   ) {}
 
   async create(
@@ -157,5 +165,71 @@ export class RestaurantsService {
       throw new BadRequestException('User could not be restored');
 
     return id;
+  }
+
+  async uploadImage(
+    id: UUID,
+    imageFile: Express.Multer.File,
+  ): Promise<ResponseRestaurantDto> {
+    let restaurant: Restaurant | null =
+      await this.restaurantRepository.findOneBy({ id: id });
+
+    if (!restaurant)
+      throw new NotFoundException('Restaurant could not update image');
+
+    const imageId: UUID = crypto.randomUUID();
+    const imageType: string = FileUtils.extractFileTypeFromMime(
+      imageFile.mimetype,
+    );
+    const imageName: string = `${imageId}.${imageType}`;
+
+    await BucketUtils.setupBucket(this.restaurantsBucket, 'restaurants');
+    await this.restaurantsBucket.putObject(
+      'restaurants',
+      imageName,
+      imageFile.buffer,
+    );
+
+    const imagePath = `${process.env.BUCKET_HOST}:${process.env.BUCKET_PORT}/restaurants/${imageName}`;
+
+    restaurant = await this.restaurantRepository.save({
+      ...restaurant,
+      imageUrl: imagePath,
+    });
+
+    return RestaurantsMapper.mapToDto(restaurant);
+  }
+
+  async uploadBannerImage(
+    id: UUID,
+    bannerImageFile: Express.Multer.File,
+  ): Promise<ResponseRestaurantDto> {
+    let restaurant: Restaurant | null =
+      await this.restaurantRepository.findOneBy({ id: id });
+
+    if (!restaurant)
+      throw new NotFoundException('Restaurant could not update banner image');
+
+    const bannerImageId: UUID = crypto.randomUUID();
+    const bannerImageType: string = FileUtils.extractFileTypeFromMime(
+      bannerImageFile.mimetype,
+    );
+    const bannerImageName: string = `${bannerImageId}.${bannerImageType}`;
+
+    await BucketUtils.setupBucket(this.restaurantsBucket, 'restaurants');
+    await this.restaurantsBucket.putObject(
+      'restaurants',
+      bannerImageName,
+      bannerImageFile.buffer,
+    );
+
+    const imagePath = `${process.env.BUCKET_HOST}:${process.env.BUCKET_PORT}/restaurants/${bannerImageName}`;
+
+    restaurant = await this.restaurantRepository.save({
+      ...restaurant,
+      bannerImageUrl: imagePath,
+    });
+
+    return RestaurantsMapper.mapToDto(restaurant);
   }
 }
