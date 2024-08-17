@@ -6,7 +6,7 @@ export function LoggerMiddleware(
   next: NextFunction,
 ) {
   console.info(
-    `[INFO] - ${new Date().toISOString()} - ${req.ip} at ${req.url} - Cacheable ${req.fresh}`,
+    `[INFO] - ${new Date().toISOString()} - ${req.ip} at ${req.url} - Cacheable ${!req.fresh}`,
   );
   next();
 }

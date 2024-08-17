@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Order } from './schemas/order.schema';
-import { OrderResponseDto } from './dto/order-response.dto';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { ListResponseDto } from 'src/shared/dtos/list-response.dto';
+import { ResponseOrderDto } from './dto/response-order.dto';
+import { OrdersMapper } from './mappers/orders.mapper';
 
 @Injectable()
 export class OrdersService {
@@ -12,25 +14,23 @@ export class OrdersService {
     private readonly orderModel: Model<Order>,
   ) {}
 
-  async create(createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
+  async create(createOrderDto: CreateOrderDto): Promise<ResponseOrderDto> {
     const order = new this.orderModel(createOrderDto);
-    return order.save();
+    await order.save();
+
+    return OrdersMapper.mapToDto(order);
   }
 
-  async findAll(): Promise<OrderResponseDto[]> {
-    const orders = await this.orderModel.find().exec();
-    return [...orders];
-  }
+  async findAll(): Promise<ListResponseDto<ResponseOrderDto>> {
+    const orders: Order[] = await this.orderModel.find().exec();
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
-  }
+    if (!orders || orders.length === 0)
+      throw new NotFoundException('Orders could not be found');
 
-  // update(id: number, updateOrderDto: UpdateOrderDto) {
-  //   return `This action updates a #${id} order`;
-  // }
+    const response: ResponseOrderDto[] = orders.map((order: Order) =>
+      OrdersMapper.mapToDto(order),
+    );
 
-  remove(id: number) {
-    return `This action removes a #${id} order`;
+    return new ListResponseDto<ResponseOrderDto>(response, 100, 0, 10);
   }
 }
