@@ -22,6 +22,7 @@ import { hashSync } from 'bcrypt';
 import { AddressesModule } from './addresses/addresses.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { DishesModule } from './dishes/dishes.module';
+import { NestMinioModule } from 'nestjs-minio';
 
 @Module({
   imports: [
@@ -113,6 +114,14 @@ import { DishesModule } from './dishes/dishes.module';
       signOptions: {
         expiresIn: process.env.JWT_EXPIRES_IN,
       },
+    }),
+    NestMinioModule.register({
+      isGlobal: true,
+      endPoint: process.env.BUCKET_HOST!,
+      port: Number(process.env.BUCKET_PORT!),
+      accessKey: process.env.BUCKET_ACCESS_KEY!,
+      secretKey: process.env.BUCKET_SECRET_KEY!,
+      useSSL: false,
     }),
     AddressesModule,
     AuthModule,

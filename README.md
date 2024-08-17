@@ -86,6 +86,10 @@ $ yarn run start:dev
 $ yarn run start:prod
 ```
 
+### Observações
+
+- Para utilizar corretamente o MINIO é necessário entrar no painel de administração e criar novas _access_key_, no caso `http://localhost:9001/access-keys`
+
 ## Testes
 
 ```bash

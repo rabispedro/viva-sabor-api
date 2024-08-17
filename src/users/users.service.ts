@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -15,8 +16,9 @@ import { ListResponseDto } from 'src/shared/dtos/list-response.dto';
 import { UsersMapper } from './mappers/users.mapper';
 import { ChangePasswordUserDto } from './dto/change-password-user.dto';
 import { ResponseUserDto } from './dto/response-user.dto';
-// import * as Minio from 'minio';
-// import { TypedClient } from 'minio/dist/main/internal/client';
+import { FileUtils } from 'src/shared/utils/file.utils';
+import { Client } from 'minio';
+import { MINIO_CONNECTION } from 'nestjs-minio';
 
 @Injectable()
 export class UsersService {
@@ -24,16 +26,9 @@ export class UsersService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
 
-    // private readonly minioRepository: TypedClient,
-  ) {
-    // this.minioRepository = new Minio.Client({
-    //   endPoint: process.env.BUCKET_HOST!,
-    //   port: Number(process.env.BUCKET_PORT!),
-    //   useSSL: false,
-    //   accessKey: process.env.BUCKET_ACCESS_KEY!,
-    //   secretKey: process.env.BUCKET_SECRET_KEY!,
-    // });
-  }
+    @Inject(MINIO_CONNECTION)
+    private readonly userBucket: Client,
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<ResponseUserDto> {
     createUserDto.password = hashSync(
@@ -171,19 +166,24 @@ export class UsersService {
     if (!user)
       throw new NotFoundException('User could not update profile photo');
 
-    const profileImageName = `${id}-${new Date().toISOString()}.${profileImageUrl.mimetype.replace('image/', '')}`;
+    const profileImageId: UUID = crypto.randomUUID();
+    const profileImageType: string = FileUtils.extractFileTypeFromMime(
+      profileImageUrl.mimetype,
+    );
+    const profileImageName: string = `${profileImageId}.${profileImageType}`;
 
-    // await this.minioRepository.putObject(
-    //   'users',
-    //   profileImageName,
-    //   profileImageUrl.buffer,
-    // );
+    await this.setupUsersBucket();
+    await this.userBucket.putObject(
+      'users',
+      profileImageName,
+      profileImageUrl.buffer,
+    );
 
-    console.info('[USER]:', user);
-    console.info('[profileImageName]:', profileImageName);
+    const profileImagePath: string = `${process.env.BUCKET_HOST!}:${process.env.BUCKET_PORT!}/users/${profileImageName}`;
+
     user = await this.usersRepository.save({
       ...user,
-      profileImageUrl: profileImageName,
+      profileImageUrl: profileImagePath,
     });
     user.password = '';
 
@@ -221,9 +221,27 @@ export class UsersService {
     return true;
   }
 
-  // private setupBucket(): Promise<Void> {
-  // const userBucketExists = await this.minioRepository.bucketExists('users');
-  // if (!userBucketExists) await this.minioRepository.makeBucket('users');
-  // return;
-  // }
+  private async setupUsersBucket(): Promise<void> {
+    const userBucketExists = await this.userBucket.bucketExists('users');
+    if (!userBucketExists) {
+      await this.userBucket.makeBucket('users');
+
+      const publicReadPolicy = {
+        Version: '2012-10-17',
+        Statement: [
+          {
+            Effect: 'Allow',
+            Principal: '*',
+            Action: ['s3:GetBucketLocation', 's3:GetObject'],
+            Resource: ['arn:aws:s3:::*'],
+          },
+        ],
+      };
+
+      await this.userBucket.setBucketPolicy(
+        'users',
+        JSON.stringify(publicReadPolicy),
+      );
+    }
+  }
 }

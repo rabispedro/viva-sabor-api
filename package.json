@@ -46,6 +46,7 @@
     "minio": "^8.0.1",
     "mongodb": "^6.8.0",
     "mongoose": "^8.5.3",
+    "nestjs-minio": "^2.6.1",
     "pg": "^8.12.0",
     "redis": "3.1.2",
     "reflect-metadata": "^0.2.0",

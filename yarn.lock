@@ -4645,7 +4645,7 @@ minimist@^1.2.6:
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.8.tgz#c1a464e7693302e082a075cee0c057741ac4772c"
   integrity sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==
 
-minio@*, minio@^8.0.1:
+minio@*, minio@^8.0.0, minio@^8.0.1:
   version "8.0.1"
   resolved "https://registry.yarnpkg.com/minio/-/minio-8.0.1.tgz#9cc553cd7e3ab2498eee32401f02915bc09edcab"
   integrity sha512-FzDO6yGnqLtm8sp3mXafWtiRUOslJSSg/aI0v9YbN5vjw5KLoODKAROCyi766NIvTSxcfHBrbhCSGk1A+MOzDg==
@@ -4819,6 +4819,13 @@ neo-async@^2.6.2:
   version "2.6.2"
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.2.tgz#b4aafb93e3aeb2d8174ca53cf163ab7d7308305f"
   integrity sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==
+
+nestjs-minio@^2.6.1:
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/nestjs-minio/-/nestjs-minio-2.6.1.tgz#36d75e380f71647067929e6b909bf722e30871e1"
+  integrity sha512-GpnnX/27r1P2fRw6Vtc57DeVlmQILqpkZZ3uwRv/ru+HfZ7LbhRo/i2eEjrwE2NxdFUoMJ2qsJ+8TTMSbL7qCw==
+  dependencies:
+    minio "^8.0.0"
 
 nice-napi@^1.0.2:
   version "1.0.2"
