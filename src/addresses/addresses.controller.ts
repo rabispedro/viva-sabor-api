@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Put,
   Patch,
+  ParseBoolPipe,
 } from '@nestjs/common';
 import { AddressesService } from './addresses.service';
 import { UpdateAddressDto } from './dto/update-address.dto';
@@ -21,6 +22,7 @@ import {
 } from '@nestjs/swagger';
 import { UUID } from 'crypto';
 import { ResponseAddressDto } from './dto/response-address.dto';
+import { Roles } from 'src/shared/decorators/roles.decorator';
 
 @Controller('addresses')
 @ApiTags('addresses')
@@ -69,5 +71,17 @@ export class AddressesController {
   @ApiResponse({ type: 'uuid' })
   async restore(@Param('id', ParseUUIDPipe) id: UUID): Promise<UUID> {
     return await this.addressesService.restore(id);
+  }
+
+  @Patch(':id/active/:flag')
+  @Roles(['admin', 'manager', 'client'])
+  @ApiParam({ name: 'id' })
+  @ApiParam({ name: 'flag' })
+  @ApiResponse({ type: ResponseAddressDto })
+  async changeActive(
+    @Param('id', ParseUUIDPipe) id: UUID,
+    @Param('flag', ParseBoolPipe) flag: boolean,
+  ): Promise<ResponseAddressDto> {
+    return await this.addressesService.changeActive(id, flag);
   }
 }

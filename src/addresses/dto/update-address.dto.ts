@@ -1,8 +1,7 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { CreateAddressDto } from './create-address.dto';
-import { IsEmpty, IsNumberString, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNumberString, IsString } from 'class-validator';
 
-export class UpdateAddressDto extends PartialType(CreateAddressDto) {
+export class UpdateAddressDto {
   @ApiProperty()
   @IsString()
   city: string;
@@ -39,6 +38,5 @@ export class UpdateAddressDto extends PartialType(CreateAddressDto) {
 
   @ApiProperty()
   @IsString()
-  @IsEmpty()
   complement?: string;
 }

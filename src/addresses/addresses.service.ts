@@ -3,7 +3,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { Repository } from 'typeorm';
 import { Address } from './entities/address.entity';
@@ -12,33 +11,13 @@ import { UUID } from 'crypto';
 import { ResponseAddressDto } from './dto/response-address.dto';
 import { AddressesMapper } from './mappers/address.mapper';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RestaurantsService } from 'src/restaurants/restaurants.service';
-import { RestaurantsMapper } from 'src/restaurants/mappers/restaurants.mapper';
-import { ResponseRestaurantDto } from 'src/restaurants/dto/response-restaurant.dto';
 
 @Injectable()
 export class AddressesService {
   constructor(
-    private readonly restaurantsService: RestaurantsService,
-
     @InjectRepository(Address)
     private readonly addressesRepository: Repository<Address>,
   ) {}
-
-  async createToRestaurant(
-    restaurantId: UUID,
-    createAddressDto: CreateAddressDto,
-  ): Promise<ResponseAddressDto> {
-    const restaurant: ResponseRestaurantDto =
-      await this.restaurantsService.findOneById(restaurantId);
-    const address: Address = this.addressesRepository.create(createAddressDto);
-
-    address.restaurants.push(RestaurantsMapper.mapToEntity(restaurant));
-    await this.addressesRepository.save(address);
-
-    return AddressesMapper.mapToDto(address);
-  }
-
   async findAllByUserId(
     userId: UUID,
   ): Promise<ListResponseDto<ResponseAddressDto>> {
@@ -90,10 +69,12 @@ export class AddressesService {
   }
 
   async update(id: UUID, updateAddressDto: UpdateAddressDto): Promise<UUID> {
-    const address: Address =
-      await this.addressesRepository.save(updateAddressDto);
+    const result: number | null | undefined = (
+      await this.addressesRepository.update(id, updateAddressDto)
+    ).affected;
 
-    if (!address) throw new BadRequestException('Address could not be updated');
+    if (!result || result === 0)
+      throw new BadRequestException('Address could not be updated');
 
     return id;
   }
@@ -122,5 +103,21 @@ export class AddressesService {
       throw new BadRequestException('Address could not be restored');
 
     return id;
+  }
+
+  async changeActive(id: UUID, flag: boolean): Promise<ResponseAddressDto> {
+    let address: Address | null = await this.addressesRepository.findOneBy({
+      id: id,
+    });
+
+    if (!address)
+      throw new NotFoundException('User with this id could not be found');
+
+    address = await this.addressesRepository.save({
+      ...address,
+      isActive: flag,
+    });
+
+    return AddressesMapper.mapToDto(address);
   }
 }

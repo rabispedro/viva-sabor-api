@@ -1,5 +1,6 @@
 import { UUID } from 'crypto';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
+import { Auditable } from 'src/shared/entities/auditable.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
@@ -10,7 +11,7 @@ import {
 } from 'typeorm';
 
 @Entity('Address')
-export class Address {
+export class Address extends Auditable {
   @PrimaryGeneratedColumn('uuid')
   id: UUID;
 
