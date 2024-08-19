@@ -2,7 +2,6 @@ import { ListResponseDto } from 'src/shared/dtos/list-response.dto';
 import {
   Controller,
   Get,
-  Post,
   Body,
   Param,
   Delete,
@@ -12,7 +11,6 @@ import {
   Patch,
 } from '@nestjs/common';
 import { AddressesService } from './addresses.service';
-import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import {
   ApiBearerAuth,
@@ -29,20 +27,6 @@ import { ResponseAddressDto } from './dto/response-address.dto';
 @ApiBearerAuth()
 export class AddressesController {
   constructor(private readonly addressesService: AddressesService) {}
-
-  @Post('restaurant/:restaurantId')
-  @ApiParam({ name: 'restaurantId' })
-  @ApiBody({ type: CreateAddressDto })
-  @ApiResponse({ type: ResponseAddressDto })
-  async createToRestaurant(
-    @Param('restaurantId', ParseUUIDPipe) restaurantId: UUID,
-    @Body(ValidationPipe) createAddressDto: CreateAddressDto,
-  ): Promise<ResponseAddressDto> {
-    return await this.addressesService.createToRestaurant(
-      restaurantId,
-      createAddressDto,
-    );
-  }
 
   @Get('user/:userId')
   @ApiParam({ name: 'userId' })

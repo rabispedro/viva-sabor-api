@@ -35,7 +35,7 @@ import { ListResponseDto } from 'src/shared/dtos/list-response.dto';
 import { UUID } from 'crypto';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ResponseUserDto } from 'src/users/dto/response-user.dto';
+import { CreateRestaurantAddressDto } from './dto/create-restaurant-address.dto';
 
 @Controller('restaurants')
 // @UseInterceptors(CacheInterceptor)
@@ -132,7 +132,7 @@ export class RestaurantsController {
       },
     },
   })
-  @ApiResponse({ type: ResponseUserDto })
+  @ApiResponse({ type: ResponseRestaurantDto })
   async uploadImage(
     @Param('id', ParseUUIDPipe) id: UUID,
     @UploadedFile(
@@ -163,7 +163,7 @@ export class RestaurantsController {
       },
     },
   })
-  @ApiResponse({ type: ResponseUserDto })
+  @ApiResponse({ type: ResponseRestaurantDto })
   async uploadBannerImage(
     @Param('id', ParseUUIDPipe) id: UUID,
     @UploadedFile(
@@ -177,5 +177,16 @@ export class RestaurantsController {
     bannerImage: Express.Multer.File,
   ): Promise<ResponseRestaurantDto> {
     return await this.restaurantsService.uploadImage(id, bannerImage);
+  }
+
+  @Post(':id/address')
+  @ApiParam({ name: 'id' })
+  @ApiBody({ type: CreateRestaurantAddressDto })
+  @ApiResponse({ type: ResponseRestaurantDto })
+  async addAddress(
+    @Param('id', ParseUUIDPipe) id: UUID,
+    @Body(ValidationPipe) createAddressDto: CreateRestaurantAddressDto,
+  ): Promise<ResponseRestaurantDto> {
+    return await this.restaurantsService.addAddress(id, createAddressDto);
   }
 }

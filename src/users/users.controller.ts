@@ -57,7 +57,7 @@ export class UsersController {
   }
 
   @Get()
-  @Roles(['admin', 'manager'])
+  @Roles(['admin'])
   @ApiResponse({ type: ListResponseDto<ResponseUserDto> })
   async findAll(): Promise<ListResponseDto<ResponseUserDto>> {
     return await this.usersService.findAll();
@@ -159,7 +159,7 @@ export class UsersController {
   @ApiParam({ name: 'id' })
   @ApiBody({ type: CreateUserAddressDto })
   @ApiResponse({ type: ResponseUserDto })
-  async createToUser(
+  async addAddress(
     @Param('id', ParseUUIDPipe) id: UUID,
     @Body(ValidationPipe) createAddressDto: CreateUserAddressDto,
   ): Promise<ResponseUserDto> {

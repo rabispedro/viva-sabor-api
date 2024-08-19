@@ -17,12 +17,17 @@ import { MINIO_CONNECTION } from 'nestjs-minio';
 import { Client } from 'minio';
 import { FileUtils } from 'src/shared/utils/file.utils';
 import { BucketUtils } from 'src/shared/utils/bucket.utils';
+import { CreateRestaurantAddressDto } from './dto/create-restaurant-address.dto';
+import { Address } from 'src/addresses/entities/address.entity';
 
 @Injectable()
 export class RestaurantsService {
   constructor(
     @InjectRepository(Restaurant)
     private readonly restaurantRepository: Repository<Restaurant>,
+
+    @InjectRepository(Address)
+    private readonly addressesRepository: Repository<Address>,
 
     @Inject(MINIO_CONNECTION)
     private readonly restaurantsBucket: Client,
@@ -105,12 +110,7 @@ export class RestaurantsService {
       (restaurant: Restaurant) => RestaurantsMapper.mapToDto(restaurant),
     );
 
-    return new ListResponseDto<ResponseRestaurantDto>(
-      [...response],
-      100,
-      0,
-      10,
-    );
+    return new ListResponseDto<ResponseRestaurantDto>(response, 100, 0, 10);
   }
 
   async update(
@@ -131,7 +131,7 @@ export class RestaurantsService {
       await this.restaurantRepository.findOneBy({ id: id });
 
     if (!restaurant)
-      throw new NotFoundException('User with this id could not be found');
+      throw new NotFoundException('Restaurant with this id could not be found');
 
     restaurant = await this.restaurantRepository.save({
       ...restaurant,
@@ -149,7 +149,7 @@ export class RestaurantsService {
     ).affected;
 
     if (!result || result === 0)
-      throw new BadRequestException('User could not be deleted');
+      throw new BadRequestException('Restaurant could not be deleted');
 
     return id;
   }
@@ -162,7 +162,7 @@ export class RestaurantsService {
     ).affected;
 
     if (!result || result === 0)
-      throw new BadRequestException('User could not be restored');
+      throw new BadRequestException('Restaurant could not be restored');
 
     return id;
   }
@@ -229,6 +229,34 @@ export class RestaurantsService {
       ...restaurant,
       bannerImageUrl: imagePath,
     });
+
+    return RestaurantsMapper.mapToDto(restaurant);
+  }
+
+  async addAddress(
+    id: UUID,
+    createAddressDto: CreateRestaurantAddressDto,
+  ): Promise<ResponseRestaurantDto> {
+    const restaurant: Restaurant | null =
+      await this.restaurantRepository.findOne({
+        where: {
+          id: id,
+        },
+        relations: {
+          addresses: true,
+        },
+        cache: true,
+      });
+
+    if (!restaurant)
+      throw new NotFoundException('Restaurant with this id could not be found');
+
+    const address: Address = this.addressesRepository.create(createAddressDto);
+
+    if (!restaurant.addresses) restaurant.addresses = [address];
+    else restaurant.addresses.push(address);
+
+    await this.restaurantRepository.save(restaurant);
 
     return RestaurantsMapper.mapToDto(restaurant);
   }

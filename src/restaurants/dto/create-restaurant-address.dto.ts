@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumberString, IsString } from 'class-validator';
 
-export class CreateAddressDto {
+export class CreateRestaurantAddressDto {
   @ApiProperty()
   @IsString()
   city: string;
