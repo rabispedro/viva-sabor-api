@@ -30,17 +30,6 @@ import { ResponseAddressDto } from './dto/response-address.dto';
 export class AddressesController {
   constructor(private readonly addressesService: AddressesService) {}
 
-  @Post('user/:userId')
-  @ApiParam({ name: 'userId' })
-  @ApiBody({ type: CreateAddressDto })
-  @ApiResponse({ type: ResponseAddressDto })
-  async createToUser(
-    @Param('userId', ParseUUIDPipe) userId: UUID,
-    @Body(ValidationPipe) createAddressDto: CreateAddressDto,
-  ): Promise<ResponseAddressDto> {
-    return await this.addressesService.createtoUser(userId, createAddressDto);
-  }
-
   @Post('restaurant/:restaurantId')
   @ApiParam({ name: 'restaurantId' })
   @ApiBody({ type: CreateAddressDto })

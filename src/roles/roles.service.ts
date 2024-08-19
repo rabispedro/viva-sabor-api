@@ -36,21 +36,16 @@ export class RolesService {
     return new ListResponseDto<ResponseRoleDto>([...response], 100, 0, 10);
   }
 
-  async findAllByName(name: string): Promise<ListResponseDto<ResponseRoleDto>> {
-    const roles: Role[] = await this.rolesRepository.find({
+  async findOneByName(name: string): Promise<ResponseRoleDto> {
+    const role: Role | null = await this.rolesRepository.findOne({
       where: {
         name: ILike(name),
       },
       cache: true,
     });
 
-    if (!roles || roles.length === 0)
-      throw new NotFoundException('Roles could not be found');
+    if (!role) throw new NotFoundException('Role could not be found');
 
-    const response: ResponseRoleDto[] = roles.map((role: Role) =>
-      RolesMapper.map(role),
-    );
-
-    return new ListResponseDto<ResponseRoleDto>([...response], 100, 0, 10);
+    return RolesMapper.map(role);
   }
 }

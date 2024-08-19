@@ -36,6 +36,7 @@ import { ListResponseDto } from 'src/shared/dtos/list-response.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ChangePasswordUserDto } from './dto/change-password-user.dto';
 import { ResponseUserDto } from './dto/response-user.dto';
+import { CreateUserAddressDto } from './dto/create-user-address.dto';
 
 @Controller('users')
 // @UseInterceptors(CacheInterceptor)
@@ -152,5 +153,16 @@ export class UsersController {
     profileImage: Express.Multer.File,
   ): Promise<ResponseUserDto> {
     return await this.usersService.uploadProfileImage(id, profileImage);
+  }
+
+  @Post(':id/address')
+  @ApiParam({ name: 'id' })
+  @ApiBody({ type: CreateUserAddressDto })
+  @ApiResponse({ type: ResponseUserDto })
+  async createToUser(
+    @Param('id', ParseUUIDPipe) id: UUID,
+    @Body(ValidationPipe) createAddressDto: CreateUserAddressDto,
+  ): Promise<ResponseUserDto> {
+    return await this.usersService.addAddress(id, createAddressDto);
   }
 }

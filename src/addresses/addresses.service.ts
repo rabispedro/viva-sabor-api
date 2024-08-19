@@ -1,4 +1,3 @@
-import { UsersService } from './../users/users.service';
 import {
   BadRequestException,
   Injectable,
@@ -13,8 +12,6 @@ import { UUID } from 'crypto';
 import { ResponseAddressDto } from './dto/response-address.dto';
 import { AddressesMapper } from './mappers/address.mapper';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ResponseUserDto } from 'src/users/dto/response-user.dto';
-import { UsersMapper } from 'src/users/mappers/users.mapper';
 import { RestaurantsService } from 'src/restaurants/restaurants.service';
 import { RestaurantsMapper } from 'src/restaurants/mappers/restaurants.mapper';
 import { ResponseRestaurantDto } from 'src/restaurants/dto/response-restaurant.dto';
@@ -22,25 +19,11 @@ import { ResponseRestaurantDto } from 'src/restaurants/dto/response-restaurant.d
 @Injectable()
 export class AddressesService {
   constructor(
-    private readonly usersService: UsersService,
     private readonly restaurantsService: RestaurantsService,
 
     @InjectRepository(Address)
     private readonly addressesRepository: Repository<Address>,
   ) {}
-
-  async createtoUser(
-    userId: UUID,
-    createAddressDto: CreateAddressDto,
-  ): Promise<ResponseAddressDto> {
-    const user: ResponseUserDto = await this.usersService.findOneById(userId);
-    const address: Address = this.addressesRepository.create(createAddressDto);
-
-    address.users.push(UsersMapper.mapToEntity(user));
-    await this.addressesRepository.save(address);
-
-    return AddressesMapper.mapToDto(address);
-  }
 
   async createToRestaurant(
     restaurantId: UUID,

@@ -48,10 +48,8 @@ export class RolesController {
   @Get('name/:name')
   @Roles(['admin', 'manager'])
   @ApiParam({ name: 'name' })
-  @ApiResponse({ type: ListResponseDto<ResponseRoleDto> })
-  async findAllByName(
-    @Param('name') name: string,
-  ): Promise<ListResponseDto<ResponseRoleDto>> {
-    return await this.rolesService.findAllByName(name);
+  @ApiResponse({ type: ResponseRoleDto })
+  async findAllByName(@Param('name') name: string): Promise<ResponseRoleDto> {
+    return await this.rolesService.findOneByName(name);
   }
 }

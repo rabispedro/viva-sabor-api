@@ -20,12 +20,17 @@ import { FileUtils } from 'src/shared/utils/file.utils';
 import { Client } from 'minio';
 import { MINIO_CONNECTION } from 'nestjs-minio';
 import { BucketUtils } from 'src/shared/utils/bucket.utils';
+import { Address } from 'src/addresses/entities/address.entity';
+import { CreateUserAddressDto } from './dto/create-user-address.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+
+    @InjectRepository(Address)
+    private readonly addressesRepository: Repository<Address>,
 
     @Inject(MINIO_CONNECTION)
     private readonly usersBucket: Client,
@@ -220,5 +225,33 @@ export class UsersService {
     await this.usersRepository.save(user);
 
     return true;
+  }
+
+  async addAddress(
+    id: UUID,
+    createUserAddressDto: CreateUserAddressDto,
+  ): Promise<ResponseUserDto> {
+    const user: User | null = await this.usersRepository.findOne({
+      where: {
+        id: id,
+      },
+      relations: {
+        addresses: true,
+      },
+      cache: true,
+    });
+
+    if (!user)
+      throw new NotFoundException('User with this id could not be found');
+
+    const address: Address =
+      this.addressesRepository.create(createUserAddressDto);
+
+    if (!user.addresses) user.addresses = [address];
+    else user.addresses.push(address);
+
+    await this.usersRepository.save(user);
+
+    return UsersMapper.mapToDto(user);
   }
 }
