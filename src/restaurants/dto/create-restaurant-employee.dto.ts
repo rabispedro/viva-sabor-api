@@ -1,16 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsArray,
+  IsString,
   IsDateString,
   IsEmail,
-  IsOptional,
   IsPhoneNumber,
-  IsString,
+  IsOptional,
   IsUrl,
 } from 'class-validator';
-import { Role } from 'src/roles/entities/role.entity';
 
-export class CreateUserDto {
+export class CreateRestaurantEmployeeDto {
   @ApiProperty()
   @IsString()
   firstName: string;
@@ -22,10 +20,6 @@ export class CreateUserDto {
   @ApiProperty()
   @IsString()
   password: string;
-
-  @ApiProperty()
-  @IsArray()
-  roles: Role[];
 
   @ApiProperty()
   @IsDateString()

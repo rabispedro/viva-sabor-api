@@ -13,7 +13,7 @@ import {
 
 @Entity('Restaurant')
 export class Restaurant extends Auditable {
-  @Column({ name: 'razao_social' })
+  @Column({ name: 'razao_social', unique: true })
   razaoSocial: string;
 
   @Column({ name: 'nome_fantasia' })

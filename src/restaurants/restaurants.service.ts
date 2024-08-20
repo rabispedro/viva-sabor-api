@@ -19,6 +19,12 @@ import { FileUtils } from 'src/shared/utils/file.utils';
 import { BucketUtils } from 'src/shared/utils/bucket.utils';
 import { CreateRestaurantAddressDto } from './dto/create-restaurant-address.dto';
 import { Address } from 'src/addresses/entities/address.entity';
+import { CreateRestaurantDishDto } from './dto/create-restaurant-dish.dto';
+import { Dish } from 'src/dishes/entities/dish.entity';
+import { CreateRestaurantEmployeeDto } from './dto/create-restaurant-employee.dto';
+import { User } from 'src/users/entities/user.entity';
+import { ResponseRoleDto } from 'src/roles/dto/response-role.dto';
+import { RolesService } from 'src/roles/roles.service';
 
 @Injectable()
 export class RestaurantsService {
@@ -28,6 +34,14 @@ export class RestaurantsService {
 
     @InjectRepository(Address)
     private readonly addressesRepository: Repository<Address>,
+
+    @InjectRepository(Dish)
+    private readonly dishesRepository: Repository<Dish>,
+
+    @InjectRepository(User)
+    private readonly employeesRepository: Repository<User>,
+
+    private readonly rolesService: RolesService,
 
     @Inject(MINIO_CONNECTION)
     private readonly restaurantsBucket: Client,
@@ -281,6 +295,68 @@ export class RestaurantsService {
 
     if (!restaurant.addresses) restaurant.addresses = [address];
     else restaurant.addresses.push(address);
+
+    await this.restaurantRepository.save(restaurant);
+
+    return RestaurantsMapper.mapToDto(restaurant);
+  }
+
+  async addDish(
+    id: UUID,
+    createRestaurantDishDto: CreateRestaurantDishDto,
+  ): Promise<ResponseRestaurantDto> {
+    const restaurant: Restaurant | null =
+      await this.restaurantRepository.findOne({
+        where: {
+          id: id,
+        },
+        relations: {
+          dishes: true,
+        },
+        cache: true,
+      });
+
+    if (!restaurant)
+      throw new NotFoundException('Restaurant with this id could not be found');
+
+    const dish: Dish = this.dishesRepository.create(createRestaurantDishDto);
+
+    if (!restaurant.dishes) restaurant.dishes = [dish];
+    else restaurant.dishes.push(dish);
+
+    await this.restaurantRepository.save(restaurant);
+
+    return RestaurantsMapper.mapToDto(restaurant);
+  }
+
+  async addEmployee(
+    id: UUID,
+    createRestaurantEmployeeDto: CreateRestaurantEmployeeDto,
+  ): Promise<ResponseRestaurantDto> {
+    const restaurant: Restaurant | null =
+      await this.restaurantRepository.findOne({
+        where: {
+          id: id,
+        },
+        relations: {
+          addresses: true,
+        },
+        cache: true,
+      });
+
+    if (!restaurant)
+      throw new NotFoundException('Restaurant with this id could not be found');
+
+    const role: ResponseRoleDto =
+      await this.rolesService.findOneByName('employee');
+
+    const employee: User = this.employeesRepository.create({
+      ...createRestaurantEmployeeDto,
+      roles: [role],
+    });
+
+    if (!restaurant.employees) restaurant.employees = [employee];
+    else restaurant.employees.push(employee);
 
     await this.restaurantRepository.save(restaurant);
 

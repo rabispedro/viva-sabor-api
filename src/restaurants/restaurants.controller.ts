@@ -36,6 +36,8 @@ import { UUID } from 'crypto';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateRestaurantAddressDto } from './dto/create-restaurant-address.dto';
+import { CreateRestaurantDishDto } from './dto/create-restaurant-dish.dto';
+import { CreateRestaurantEmployeeDto } from './dto/create-restaurant-employee.dto';
 
 @Controller('restaurants')
 // @UseInterceptors(CacheInterceptor)
@@ -191,6 +193,33 @@ export class RestaurantsController {
     return await this.restaurantsService.addAddress(
       id,
       createRestaurantAddressDto,
+    );
+  }
+
+  @Post(':id/dish')
+  @ApiParam({ name: 'id' })
+  @ApiBody({ type: CreateRestaurantDishDto })
+  @ApiResponse({ type: ResponseRestaurantDto })
+  async addDish(
+    @Param('id', ParseUUIDPipe) id: UUID,
+    @Body(ValidationPipe)
+    createRestaurantDishDto: CreateRestaurantDishDto,
+  ): Promise<ResponseRestaurantDto> {
+    return await this.restaurantsService.addDish(id, createRestaurantDishDto);
+  }
+
+  @Post(':id/employee')
+  @ApiParam({ name: 'id' })
+  @ApiBody({ type: CreateRestaurantEmployeeDto })
+  @ApiResponse({ type: ResponseRestaurantDto })
+  async addEmployee(
+    @Param('id', ParseUUIDPipe) id: UUID,
+    @Body(ValidationPipe)
+    createRestaurantEmployeeDto: CreateRestaurantEmployeeDto,
+  ): Promise<ResponseRestaurantDto> {
+    return await this.restaurantsService.addEmployee(
+      id,
+      createRestaurantEmployeeDto,
     );
   }
 }

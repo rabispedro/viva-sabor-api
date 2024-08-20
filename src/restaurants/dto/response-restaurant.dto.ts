@@ -1,9 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { UUID } from 'crypto';
 import { ResponseAddressDto } from 'src/addresses/dto/response-address.dto';
 import { ResponseDishDto } from 'src/dishes/dto/response-dish.dto';
 import { ResponseUserDto } from 'src/users/dto/response-user.dto';
 
 export class ResponseRestaurantDto {
+  @ApiProperty()
+  id: UUID;
+
   @ApiProperty()
   razaoSocial: string;
 

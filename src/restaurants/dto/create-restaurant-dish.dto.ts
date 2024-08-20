@@ -1,9 +1,8 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { CreateDishDto } from './create-dish.dto';
-import { DishCategoryType } from '../types/dish-category.type';
+import { ApiProperty } from '@nestjs/swagger';
+import { DishCategoryType } from 'src/dishes/types/dish-category.type';
 import { IsNumber, IsString } from 'class-validator';
 
-export class UpdateDishDto extends PartialType(CreateDishDto) {
+export class CreateRestaurantDishDto {
   @ApiProperty()
   @IsString()
   name: string;

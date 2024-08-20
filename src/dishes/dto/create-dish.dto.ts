@@ -1,21 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { DishCategoryType } from '../types/dish-category.type';
+import { IsNumber, IsString } from 'class-validator';
 
 export class CreateDishDto {
   @ApiProperty()
+  @IsString()
   name: string;
 
   @ApiProperty()
+  @IsString()
   description: string;
 
   @ApiProperty()
   category: DishCategoryType;
 
   @ApiProperty()
-  restaurant: Restaurant;
-
-  @ApiProperty()
+  @IsNumber()
   price: number;
 
   @ApiProperty()
