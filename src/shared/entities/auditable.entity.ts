@@ -20,6 +20,6 @@ export abstract class Auditable {
   @DeleteDateColumn({ name: 'deleted_at', select: false })
   deletedAt: Date;
 
-  @Column({ name: 'is_active', nullable: false, default: true, select: false })
+  @Column({ name: 'is_active', nullable: false, default: true })
   isActive: boolean;
 }

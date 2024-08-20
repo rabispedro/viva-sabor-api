@@ -28,7 +28,7 @@ export class Restaurant extends Auditable {
   @Column({ name: 'banner_image_url', nullable: true })
   bannerImageUrl?: string;
 
-  @Column({ name: 'minimum_fee' })
+  @Column({ name: 'minimum_fee', type: 'numeric' })
   minimumFee: number;
 
   @Column({ name: 'email', unique: true })

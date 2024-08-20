@@ -29,13 +29,13 @@ export class Dish extends Auditable {
   })
   category: DishCategoryType;
 
-  @Column({ name: 'price' })
+  @Column({ name: 'price', type: 'int8' })
   price: number;
 
-  @Column({ name: 'discount', nullable: true })
+  @Column({ name: 'discount', nullable: true, type: 'int8' })
   discount?: number;
 
-  @Column({ name: 'image_url' })
+  @Column({ name: 'image_url', nullable: true })
   imageUrl?: string;
 
   @ManyToOne(() => Restaurant, (restaurant: Restaurant) => restaurant.dishes, {

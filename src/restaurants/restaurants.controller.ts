@@ -185,8 +185,12 @@ export class RestaurantsController {
   @ApiResponse({ type: ResponseRestaurantDto })
   async addAddress(
     @Param('id', ParseUUIDPipe) id: UUID,
-    @Body(ValidationPipe) createAddressDto: CreateRestaurantAddressDto,
+    @Body(ValidationPipe)
+    createRestaurantAddressDto: CreateRestaurantAddressDto,
   ): Promise<ResponseRestaurantDto> {
-    return await this.restaurantsService.addAddress(id, createAddressDto);
+    return await this.restaurantsService.addAddress(
+      id,
+      createRestaurantAddressDto,
+    );
   }
 }

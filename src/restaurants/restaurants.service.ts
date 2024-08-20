@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Restaurant } from './entities/restaurant.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { RestaurantsMapper } from './mappers/restaurants.mapper';
 import { ResponseRestaurantDto } from './dto/response-restaurant.dto';
 import { CreateRestaurantDto } from './dto/create-restaurant.dto';
@@ -60,12 +60,7 @@ export class RestaurantsService {
       (restaurant: Restaurant) => RestaurantsMapper.mapToDto(restaurant),
     );
 
-    return new ListResponseDto<ResponseRestaurantDto>(
-      [...response],
-      100,
-      0,
-      10,
-    );
+    return new ListResponseDto<ResponseRestaurantDto>(response, 100, 0, 10);
   }
 
   async findOneById(id: UUID): Promise<ResponseRestaurantDto> {
@@ -93,7 +88,7 @@ export class RestaurantsService {
   ): Promise<ListResponseDto<ResponseRestaurantDto>> {
     const restaurants: Restaurant[] = await this.restaurantRepository.find({
       where: {
-        nomeFantasia: name,
+        nomeFantasia: ILike(`%${name}%`),
       },
       relations: {
         addresses: true,
@@ -117,18 +112,23 @@ export class RestaurantsService {
     id: UUID,
     updateRestaurantDto: UpdateRestaurantDto,
   ): Promise<UUID> {
-    const restaurant: Restaurant =
-      await this.restaurantRepository.save(updateRestaurantDto);
+    const result: number | null | undefined = (
+      await this.restaurantRepository.update(id, updateRestaurantDto)
+    ).affected;
 
-    if (!restaurant)
+    if (!result || result === 0)
       throw new BadRequestException('Restaurant could not be updated');
 
     return id;
   }
 
   async changeActive(id: UUID, flag: boolean): Promise<ResponseRestaurantDto> {
-    let restaurant: Restaurant | null =
-      await this.restaurantRepository.findOneBy({ id: id });
+    let restaurant: Restaurant | null = await this.restaurantRepository.findOne(
+      {
+        where: { id: id },
+        cache: true,
+      },
+    );
 
     if (!restaurant)
       throw new NotFoundException('Restaurant with this id could not be found');
@@ -171,8 +171,14 @@ export class RestaurantsService {
     id: UUID,
     imageFile: Express.Multer.File,
   ): Promise<ResponseRestaurantDto> {
-    let restaurant: Restaurant | null =
-      await this.restaurantRepository.findOneBy({ id: id });
+    let restaurant: Restaurant | null = await this.restaurantRepository.findOne(
+      {
+        where: {
+          id: id,
+        },
+        cache: true,
+      },
+    );
 
     if (!restaurant)
       throw new NotFoundException('Restaurant could not update image');
@@ -182,19 +188,25 @@ export class RestaurantsService {
       imageFile.mimetype,
     );
     const imageName: string = `${imageId}.${imageType}`;
+    const imagePrefix: string = `${process.env.BUCKET_HOST}:${process.env.BUCKET_PORT}/restaurants`;
 
     await BucketUtils.setupBucket(this.restaurantsBucket, 'restaurants');
+
+    if (!!restaurant.imageUrl)
+      await this.restaurantsBucket.removeObject(
+        'restaurants',
+        restaurant.imageUrl.replace(`${imagePrefix}/`, ''),
+      );
+
     await this.restaurantsBucket.putObject(
       'restaurants',
       imageName,
       imageFile.buffer,
     );
 
-    const imagePath = `${process.env.BUCKET_HOST}:${process.env.BUCKET_PORT}/restaurants/${imageName}`;
-
     restaurant = await this.restaurantRepository.save({
       ...restaurant,
-      imageUrl: imagePath,
+      imageUrl: `${imagePrefix}/${imageName}`,
     });
 
     return RestaurantsMapper.mapToDto(restaurant);
@@ -204,8 +216,14 @@ export class RestaurantsService {
     id: UUID,
     bannerImageFile: Express.Multer.File,
   ): Promise<ResponseRestaurantDto> {
-    let restaurant: Restaurant | null =
-      await this.restaurantRepository.findOneBy({ id: id });
+    let restaurant: Restaurant | null = await this.restaurantRepository.findOne(
+      {
+        where: {
+          id: id,
+        },
+        cache: true,
+      },
+    );
 
     if (!restaurant)
       throw new NotFoundException('Restaurant could not update banner image');
@@ -215,19 +233,25 @@ export class RestaurantsService {
       bannerImageFile.mimetype,
     );
     const bannerImageName: string = `${bannerImageId}.${bannerImageType}`;
+    const bannerImagePrefix = `${process.env.BUCKET_HOST}:${process.env.BUCKET_PORT}/restaurants`;
 
     await BucketUtils.setupBucket(this.restaurantsBucket, 'restaurants');
+
+    if (!!restaurant.bannerImageUrl)
+      await this.restaurantsBucket.removeObject(
+        'restaurants',
+        restaurant.bannerImageUrl.replace(`${bannerImagePrefix}/`, ''),
+      );
+
     await this.restaurantsBucket.putObject(
       'restaurants',
       bannerImageName,
       bannerImageFile.buffer,
     );
 
-    const imagePath = `${process.env.BUCKET_HOST}:${process.env.BUCKET_PORT}/restaurants/${bannerImageName}`;
-
     restaurant = await this.restaurantRepository.save({
       ...restaurant,
-      bannerImageUrl: imagePath,
+      bannerImageUrl: `${bannerImagePrefix}/${bannerImageName}`,
     });
 
     return RestaurantsMapper.mapToDto(restaurant);
@@ -235,7 +259,7 @@ export class RestaurantsService {
 
   async addAddress(
     id: UUID,
-    createAddressDto: CreateRestaurantAddressDto,
+    createRestaurantAddressDto: CreateRestaurantAddressDto,
   ): Promise<ResponseRestaurantDto> {
     const restaurant: Restaurant | null =
       await this.restaurantRepository.findOne({
@@ -251,7 +275,9 @@ export class RestaurantsService {
     if (!restaurant)
       throw new NotFoundException('Restaurant with this id could not be found');
 
-    const address: Address = this.addressesRepository.create(createAddressDto);
+    const address: Address = this.addressesRepository.create(
+      createRestaurantAddressDto,
+    );
 
     if (!restaurant.addresses) restaurant.addresses = [address];
     else restaurant.addresses.push(address);

@@ -52,7 +52,9 @@ export class UsersService {
   async findAll(): Promise<ListResponseDto<ResponseUserDto>> {
     const users: User[] = await this.usersRepository.find({
       relations: {
+        addresses: true,
         roles: true,
+        restaurant: true,
       },
       cache: true,
       // skip: 1,
@@ -67,7 +69,7 @@ export class UsersService {
       UsersMapper.mapToDto(user),
     );
 
-    return new ListResponseDto<ResponseUserDto>([...response], 100, 0, 10);
+    return new ListResponseDto<ResponseUserDto>(response, 100, 0, 10);
   }
 
   async findOneById(
@@ -119,7 +121,12 @@ export class UsersService {
   }
 
   async changeActive(id: UUID, flag: boolean): Promise<ResponseUserDto> {
-    let user: User | null = await this.usersRepository.findOneBy({ id: id });
+    let user: User | null = await this.usersRepository.findOne({
+      where: {
+        id: id,
+      },
+      cache: true,
+    });
 
     if (!user)
       throw new NotFoundException('User with this id could not be found');
@@ -130,9 +137,12 @@ export class UsersService {
   }
 
   async update(id: UUID, updateUserDto: UpdateUserDto): Promise<UUID> {
-    const user: User = await this.usersRepository.save(updateUserDto);
+    const result: number | null | undefined = (
+      await this.usersRepository.update(id, updateUserDto)
+    ).affected;
 
-    if (!user) throw new BadRequestException('User could not be updated');
+    if (!result || result === 0)
+      throw new BadRequestException('User could not be updated');
 
     return id;
   }
@@ -151,11 +161,7 @@ export class UsersService {
   }
 
   async restore(id: UUID): Promise<UUID> {
-    const result = (
-      await this.usersRepository.restore({
-        id: id,
-      })
-    ).affected;
+    const result = (await this.usersRepository.restore({ id: id })).affected;
 
     if (!result || result === 0)
       throw new BadRequestException('User could not be restored');
@@ -167,7 +173,12 @@ export class UsersService {
     id: UUID,
     profileImageFile: Express.Multer.File,
   ): Promise<ResponseUserDto> {
-    let user: User | null = await this.usersRepository.findOneBy({ id: id });
+    let user: User | null = await this.usersRepository.findOne({
+      where: {
+        id: id,
+      },
+      cache: true,
+    });
 
     if (!user)
       throw new NotFoundException('User could not update profile photo');
@@ -177,19 +188,25 @@ export class UsersService {
       profileImageFile.mimetype,
     );
     const profileImageName: string = `${profileImageId}.${profileImageType}`;
+    const profileImagePrefix: string = `${process.env.BUCKET_HOST!}:${process.env.BUCKET_PORT!}/users`;
 
     await BucketUtils.setupBucket(this.usersBucket, 'users');
+
+    if (!!user.profileImageUrl)
+      await this.usersBucket.removeObject(
+        'users',
+        user.profileImageUrl.replace(`${profileImagePrefix}/`, ''),
+      );
+
     await this.usersBucket.putObject(
       'users',
       profileImageName,
       profileImageFile.buffer,
     );
 
-    const profileImagePath: string = `${process.env.BUCKET_HOST!}:${process.env.BUCKET_PORT!}/users/${profileImageName}`;
-
     user = await this.usersRepository.save({
       ...user,
-      profileImageUrl: profileImagePath,
+      profileImageUrl: `${profileImagePrefix}/${profileImageName}`,
     });
     user.password = '';
 
@@ -204,9 +221,10 @@ export class UsersService {
       where: {
         id: id,
       },
+      cache: true,
     });
 
-    if (!user || !user.password)
+    if (!user)
       throw new NotFoundException('User with this id could not be found');
 
     const passwordMatch: boolean = await compare(

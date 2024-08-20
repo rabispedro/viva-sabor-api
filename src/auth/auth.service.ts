@@ -18,7 +18,7 @@ export class AuthService {
       authLoginDto.email,
     );
 
-    if (!user || !user.password)
+    if (!user || !user.password || !user.isActive)
       throw new UnauthorizedException('User not authorized');
 
     const passwordMatch: boolean = await compare(

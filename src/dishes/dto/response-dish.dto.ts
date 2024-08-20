@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { DishCategoryType } from '../types/dish-category.type';
 import { UUID } from 'crypto';
+import { ResponseRestaurantDto } from 'src/restaurants/dto/response-restaurant.dto';
+import { ResponseUserDto } from 'src/users/dto/response-user.dto';
 
 export class ResponseDishDto {
   @ApiProperty()
@@ -15,7 +17,11 @@ export class ResponseDishDto {
   @ApiProperty()
   category: DishCategoryType;
 
-  restaurantId: UUID;
+  @ApiProperty()
+  restaurants: ResponseRestaurantDto[];
+
+  @ApiProperty()
+  users: ResponseUserDto[];
 
   @ApiProperty()
   price: number;

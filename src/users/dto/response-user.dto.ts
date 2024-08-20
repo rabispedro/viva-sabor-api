@@ -32,4 +32,7 @@ export class ResponseUserDto {
 
   @ApiProperty()
   addresses: ResponseAddressDto[];
+
+  @ApiProperty()
+  isActive: boolean;
 }

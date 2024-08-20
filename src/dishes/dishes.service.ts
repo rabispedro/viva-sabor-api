@@ -57,7 +57,7 @@ export class DishesService {
       DishesMapper.mapToDto(dish),
     );
 
-    return new ListResponseDto<ResponseDishDto>([...response], 100, 0, 10);
+    return new ListResponseDto<ResponseDishDto>(response, 100, 0, 10);
   }
 
   async findAllByNameOrDescription(
@@ -66,10 +66,10 @@ export class DishesService {
     const dishes: Dish[] = await this.dishesRepository.find({
       where: [
         {
-          name: ILike(query),
+          name: ILike(`%${query}%`),
         },
         {
-          description: ILike(query),
+          description: ILike(`%${query}%`),
         },
       ],
       relations: {
@@ -85,13 +85,16 @@ export class DishesService {
       DishesMapper.mapToDto(dish),
     );
 
-    return new ListResponseDto<ResponseDishDto>([...response], 100, 0, 10);
+    return new ListResponseDto<ResponseDishDto>(response, 100, 0, 10);
   }
 
   async update(id: UUID, updateDishDto: UpdateDishDto): Promise<UUID> {
-    const dish: Dish = await this.dishesRepository.save(updateDishDto);
+    const result: number | null | undefined = (
+      await this.dishesRepository.update(id, updateDishDto)
+    ).affected;
 
-    if (!dish) throw new BadRequestException('Dish could not be updated');
+    if (!result || result === 0)
+      throw new BadRequestException('Dish could not be updated');
 
     return id;
   }
@@ -122,7 +125,12 @@ export class DishesService {
     id: UUID,
     imageFile: Express.Multer.File,
   ): Promise<ResponseDishDto> {
-    let dish: Dish | null = await this.dishesRepository.findOneBy({ id: id });
+    let dish: Dish | null = await this.dishesRepository.findOne({
+      where: {
+        id: id,
+      },
+      cache: true,
+    });
 
     if (!dish) throw new NotFoundException('Dish could not update image');
 
@@ -131,15 +139,21 @@ export class DishesService {
       imageFile.mimetype,
     );
     const imageName: string = `${imageId}.${imageType}`;
+    const imagePrefix: string = `${process.env.BUCKET_HOST!}:${process.env.BUCKET_PORT!}/dishes`;
 
     await BucketUtils.setupBucket(this.dishesBucket, 'dishes');
-    await this.dishesBucket.putObject('dishes', imageName, imageFile.buffer);
 
-    const profileImagePath: string = `${process.env.BUCKET_HOST!}:${process.env.BUCKET_PORT!}/dishes/${imageName}`;
+    if (!!dish.imageUrl)
+      await this.dishesBucket.removeObject(
+        'dishes',
+        dish.imageUrl.replace(`${imagePrefix}/`, ''),
+      );
+
+    await this.dishesBucket.putObject('dishes', imageName, imageFile.buffer);
 
     dish = await this.dishesRepository.save({
       ...dish,
-      imageUrl: profileImagePath,
+      imageUrl: `${imagePrefix}/${imageName}`,
     });
 
     return DishesMapper.mapToDto(dish);

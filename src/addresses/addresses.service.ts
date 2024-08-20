@@ -40,7 +40,7 @@ export class AddressesService {
       AddressesMapper.mapToDto(address),
     );
 
-    return new ListResponseDto<ResponseAddressDto>([...response], 100, 0, 10);
+    return new ListResponseDto<ResponseAddressDto>(response, 100, 0, 10);
   }
 
   async findAllByRestaurantId(
@@ -65,7 +65,7 @@ export class AddressesService {
       AddressesMapper.mapToDto(address),
     );
 
-    return new ListResponseDto<ResponseAddressDto>([...response], 100, 0, 10);
+    return new ListResponseDto<ResponseAddressDto>(response, 100, 0, 10);
   }
 
   async update(id: UUID, updateAddressDto: UpdateAddressDto): Promise<UUID> {
@@ -106,12 +106,15 @@ export class AddressesService {
   }
 
   async changeActive(id: UUID, flag: boolean): Promise<ResponseAddressDto> {
-    let address: Address | null = await this.addressesRepository.findOneBy({
-      id: id,
+    let address: Address | null = await this.addressesRepository.findOne({
+      where: {
+        id: id,
+      },
+      cache: true,
     });
 
     if (!address)
-      throw new NotFoundException('User with this id could not be found');
+      throw new NotFoundException('Address with this id could not be found');
 
     address = await this.addressesRepository.save({
       ...address,

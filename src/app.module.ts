@@ -23,6 +23,9 @@ import { AddressesModule } from './addresses/addresses.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { DishesModule } from './dishes/dishes.module';
 import { NestMinioModule } from 'nestjs-minio';
+import { Address } from './addresses/entities/address.entity';
+import { Restaurant } from './restaurants/entities/restaurant.entity';
+import { Dish } from './dishes/entities/dish.entity';
 
 @Module({
   imports: [
@@ -85,8 +88,10 @@ import { NestMinioModule } from 'nestjs-minio';
       password: process.env.SQL_PASSWORD,
       database: process.env.SQL_DB,
       autoLoadEntities: true,
-      logging: true,
-      synchronize: true,
+
+      // Somente quando em ambiente de desenvolvimento
+      logging: process.env.ENV === 'dev',
+      synchronize: process.env.ENV === 'dev',
     }),
     MongooseModule.forRoot(
       // `${process.env.NOSQL_DB}://${process.env.NOSQL_USER}:${process.env.NOSQL_PASSWORD}@mongo:${process.env.NOSQL_PORT}/nest`,
@@ -230,6 +235,183 @@ export class AppModule {
 
     this.dataSource
       .createQueryBuilder()
+      .insert()
+      .into(Restaurant)
+      .values([
+        {
+          id: '40cba349-8c60-4fa3-be6d-728d77f39396',
+          cnpj: '00987654321',
+          email: 'jocaL@mail.com',
+          minimumFee: 2_00,
+          nomeFantasia: 'Joca Lanches',
+          phoneNumber: '+5515912365412',
+          razaoSocial: 'Joaquim Barbosa Comercios Alimenticios S/A',
+        },
+        {
+          id: 'e639667c-7afe-47cb-a781-63f36f3dfeef',
+          cnpj: '12345678900',
+          email: 'kotb@mail.com',
+          minimumFee: 9_215_00,
+          nomeFantasia: 'King of the Burguer',
+          phoneNumber: '+5564933223232',
+          razaoSocial: 'Hamburgueria Costa da Silva LTDA.',
+        },
+      ])
+      .orIgnore()
+      .execute();
+
+    this.dataSource
+      .createQueryBuilder()
+      .insert()
+      .into(Address)
+      .values([
+        {
+          id: 'd24e206f-5f41-46d7-a863-4d058ed27759',
+          block: 'Pão de Queijo',
+          city: 'Araxá',
+          country: 'Brasil',
+          number: '125',
+          postalCode: '12365478',
+          state: 'Minas Gerais',
+          street: 'Dos Alegres',
+          uf: 'MG',
+        },
+        {
+          id: 'd0a53947-7c7f-4b3f-920d-340cb64e87c6',
+          block: 'Bonfim',
+          city: 'São José do Rio Preto',
+          country: 'Brasil',
+          number: '001',
+          postalCode: '25845613',
+          state: 'Goiás',
+          street: 'Das Folias',
+          uf: 'GO',
+        },
+        {
+          id: '76d5fc36-77fd-4a24-9317-457d90160ba7',
+          block: 'Veredas',
+          city: 'Nova Friburgo',
+          country: 'Brasil',
+          number: '52',
+          postalCode: '64973128',
+          state: 'Goiás',
+          street: 'Da Paixão',
+          uf: 'GO',
+        },
+        {
+          id: '6f43051e-ca1a-4b92-b919-b0704e0175ab',
+          block: 'Passo Fundo',
+          city: 'Cuiabá',
+          country: 'Brasil',
+          number: '4467',
+          postalCode: '74185524',
+          state: 'Mato Grosso',
+          street: 'Das Araras',
+          uf: 'MT',
+        },
+        {
+          id: 'ae2bdc94-4990-4727-acec-8fb3d01b093d',
+          block: 'Bourdon',
+          city: 'Micenas',
+          country: 'Brasil',
+          number: '4557',
+          postalCode: '78978978',
+          state: 'Mato Grosso do Sul',
+          street: 'Da Saudade',
+          uf: 'MS',
+        },
+        {
+          id: 'e8eec262-cd0d-41e8-b0e3-dd59f4bf962b',
+          block: 'Cambotá',
+          city: 'Friburgo',
+          country: 'Brasil',
+          number: '678',
+          postalCode: '45645645',
+          state: 'Roraima',
+          street: 'Das Alamedas',
+          uf: 'RR',
+        },
+        {
+          id: 'be87e018-0550-48b3-88cb-c1b907e82778',
+          block: 'Abobado',
+          city: 'Brasileirinho',
+          country: 'Brasil',
+          complement: 'Casa Engraçada',
+          number: '0',
+          postalCode: '12312312',
+          state: 'Acre',
+          street: 'Dos Bobos',
+          uf: 'AC',
+        },
+      ])
+      .orIgnore()
+      .execute();
+
+    this.dataSource
+      .createQueryBuilder()
+      .insert()
+      .into(Dish)
+      .values([
+        {
+          id: 'f5ddf192-213b-48a8-b6aa-ae938decf55b',
+          category: 'Bebidas',
+          discount: 99,
+          description: 'Aquela que desce redondo',
+          name: 'SKOL Lata 350ml',
+          price: 8_00,
+        },
+        {
+          id: '8838d6e2-34b0-4072-8ad7-b72d0412a4b6',
+          category: 'Bebidas',
+          description: 'A mais refrescante do Brasil',
+          name: 'Coca-Cola Lata 350ml',
+          price: 6_00,
+        },
+        {
+          id: '9300df6f-41dc-4d4b-b841-ab704dea5f0b',
+          category: 'Massas',
+          discount: 4_89,
+          description: 'Pizza 6 fatias',
+          name: 'Pizza Doce',
+          price: 60_00,
+        },
+        {
+          id: 'f10f30f9-7c3b-4281-81f1-e51d3ddb6755',
+          category: 'Populares',
+          discount: 59,
+          description: 'Pipoca agridoce',
+          name: 'Pipoca Caramelizada com Sal',
+          price: 10_00,
+        },
+        {
+          id: 'd67ed364-e90a-431f-9de0-b2baf8dd8f7a',
+          category: 'Populares',
+          discount: 1_29,
+          description: 'Chocolate ao Leite e Morango',
+          name: 'Pastel Sensação',
+          price: 11_50,
+        },
+        {
+          id: '76fae4b3-bdf8-4b17-8960-5c4511eb752b',
+          category: 'Vegetarianos',
+          description: 'O lanche mais vegano que você vai ver',
+          name: 'Podrão Veggie',
+          price: 32_00,
+        },
+        {
+          id: 'b662e4b8-c58f-48df-b3f5-1f318efe86c1',
+          category: 'Promoções',
+          discount: 15_79,
+          description: 'O prato feito mais completo do mercado',
+          name: 'Prato Feito Macarronada',
+          price: 22_00,
+        },
+      ])
+      .orIgnore()
+      .execute();
+
+    this.dataSource
+      .createQueryBuilder()
       .relation(User, 'roles')
       .of('5119a9bf-aec7-42e1-8123-e2ad4c5449b0')
       .addAndRemove(
@@ -262,6 +444,150 @@ export class AppModule {
       .addAndRemove(
         'c9d5b839-1ea1-4242-9b4c-d7578eade02c',
         'c9d5b839-1ea1-4242-9b4c-d7578eade02c',
+      );
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(Restaurant, 'dishes')
+      .of('40cba349-8c60-4fa3-be6d-728d77f39396')
+      .addAndRemove(
+        'f5ddf192-213b-48a8-b6aa-ae938decf55b',
+        'f5ddf192-213b-48a8-b6aa-ae938decf55b',
+      );
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(Restaurant, 'dishes')
+      .of('40cba349-8c60-4fa3-be6d-728d77f39396')
+      .addAndRemove(
+        '8838d6e2-34b0-4072-8ad7-b72d0412a4b6',
+        '8838d6e2-34b0-4072-8ad7-b72d0412a4b6',
+      );
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(Restaurant, 'dishes')
+      .of('e639667c-7afe-47cb-a781-63f36f3dfeef')
+      .addAndRemove(
+        '9300df6f-41dc-4d4b-b841-ab704dea5f0b',
+        '9300df6f-41dc-4d4b-b841-ab704dea5f0b',
+      );
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(Restaurant, 'dishes')
+      .of('e639667c-7afe-47cb-a781-63f36f3dfeef')
+      .addAndRemove(
+        'f10f30f9-7c3b-4281-81f1-e51d3ddb6755',
+        'f10f30f9-7c3b-4281-81f1-e51d3ddb6755',
+      );
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(Restaurant, 'dishes')
+      .of('e639667c-7afe-47cb-a781-63f36f3dfeef')
+      .addAndRemove(
+        'd67ed364-e90a-431f-9de0-b2baf8dd8f7a',
+        'd67ed364-e90a-431f-9de0-b2baf8dd8f7a',
+      );
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(Restaurant, 'dishes')
+      .of('e639667c-7afe-47cb-a781-63f36f3dfeef')
+      .addAndRemove(
+        '76fae4b3-bdf8-4b17-8960-5c4511eb752b',
+        '76fae4b3-bdf8-4b17-8960-5c4511eb752b',
+      );
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(Restaurant, 'dishes')
+      .of('e639667c-7afe-47cb-a781-63f36f3dfeef')
+      .addAndRemove(
+        'b662e4b8-c58f-48df-b3f5-1f318efe86c1',
+        'b662e4b8-c58f-48df-b3f5-1f318efe86c1',
+      );
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(User, 'addresses')
+      .of('5119a9bf-aec7-42e1-8123-e2ad4c5449b0')
+      .addAndRemove(
+        'be87e018-0550-48b3-88cb-c1b907e82778',
+        'be87e018-0550-48b3-88cb-c1b907e82778',
+      );
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(User, 'addresses')
+      .of('5119a9bf-aec7-42e1-8123-e2ad4c5449b0')
+      .addAndRemove(
+        'e8eec262-cd0d-41e8-b0e3-dd59f4bf962b',
+        'e8eec262-cd0d-41e8-b0e3-dd59f4bf962b',
+      );
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(User, 'addresses')
+      .of('6e04803e-b1fd-4cf2-a635-9f07f137aa65')
+      .addAndRemove(
+        'ae2bdc94-4990-4727-acec-8fb3d01b093d',
+        'ae2bdc94-4990-4727-acec-8fb3d01b093d',
+      );
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(User, 'addresses')
+      .of('cc624950-2644-4e64-9fb3-87adb2f7e208')
+      .addAndRemove(
+        '6f43051e-ca1a-4b92-b919-b0704e0175ab',
+        '6f43051e-ca1a-4b92-b919-b0704e0175ab',
+      );
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(User, 'addresses')
+      .of('81913100-9e53-43a6-8b1c-e74661249806')
+      .addAndRemove(
+        '76d5fc36-77fd-4a24-9317-457d90160ba7',
+        '76d5fc36-77fd-4a24-9317-457d90160ba7',
+      );
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(Restaurant, 'addresses')
+      .of('e639667c-7afe-47cb-a781-63f36f3dfeef')
+      .addAndRemove(
+        'd0a53947-7c7f-4b3f-920d-340cb64e87c6',
+        'd0a53947-7c7f-4b3f-920d-340cb64e87c6',
+      );
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(Restaurant, 'addresses')
+      .of('40cba349-8c60-4fa3-be6d-728d77f39396')
+      .addAndRemove(
+        'd24e206f-5f41-46d7-a863-4d058ed27759',
+        'd24e206f-5f41-46d7-a863-4d058ed27759',
+      );
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(Restaurant, 'employees')
+      .of('40cba349-8c60-4fa3-be6d-728d77f39396')
+      .addAndRemove(
+        '6e04803e-b1fd-4cf2-a635-9f07f137aa65',
+        '6e04803e-b1fd-4cf2-a635-9f07f137aa65',
+      );
+
+    this.dataSource
+      .createQueryBuilder()
+      .relation(Restaurant, 'employees')
+      .of('e639667c-7afe-47cb-a781-63f36f3dfeef')
+      .addAndRemove(
+        'cc624950-2644-4e64-9fb3-87adb2f7e208',
+        'cc624950-2644-4e64-9fb3-87adb2f7e208',
       );
   }
 }
